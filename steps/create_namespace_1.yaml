@@ -1,0 +1,25 @@
+template:
+  name: create namespace
+  identifier: create_namespace
+  versionLabel: "1"
+  type: Step
+  projectIdentifier: development
+  orgIdentifier: default
+  tags: {}
+  spec:
+    timeout: 10m
+    type: Command
+    spec:
+      onDelegate: false
+      environmentVariables: []
+      outputVariables: []
+      commandUnits:
+        - identifier: create_namespace
+          name: create namespace
+          type: Script
+          spec:
+            shell: Bash
+            source:
+              type: Inline
+              spec:
+                script: kubectl create ns <+stage.spec.infrastructure.infrastructureDefinition.spec.namespace> --dry-run=client -o yaml | kubectl apply -f -
