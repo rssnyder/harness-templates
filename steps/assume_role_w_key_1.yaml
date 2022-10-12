@@ -40,11 +40,11 @@ template:
           value: <+input>
       outputVariables:
         - name: AWS_ACCESS_KEY_ID
-          type: String
+          type: Secret
           value: AWS_ACCESS_KEY_ID
         - name: AWS_SECRET_ACCESS_KEY
-          type: String
+          type: Secret
           value: AWS_SECRET_ACCESS_KEY
         - name: AWS_SESSION_TOKEN
-          type: String
+          type: Secret
           value: AWS_SESSION_TOKEN
