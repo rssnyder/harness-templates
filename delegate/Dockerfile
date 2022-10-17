@@ -18,4 +18,13 @@ RUN unzip terraform_1.3.1_linux_amd64.zip
 RUN mv ./terraform /usr/bin/
 RUN terraform --version
 
+# Install Azure CLI
+RUN echo -e "[azure-cli] \n\
+name=Azure CLI \n\
+baseurl=https://packages.microsoft.com/yumrepos/azure-cli \n\
+enabled=1 \n\
+gpgcheck=1 \n\
+gpgkey=https://packages.microsoft.com/keys/microsoft.asc" | tee /etc/yum.repos.d/azure-cli.repo
+RUN microdnf install azure-cli
+
 USER 1001
