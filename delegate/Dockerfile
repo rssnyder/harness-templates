@@ -1,4 +1,5 @@
-FROM harness/delegate-immutable:22.10.77021
+ARG DELEGATE_TAG=22.09.76822
+FROM harness/delegate-immutable:$DELEGATE_TAG
 
 USER 0
 
