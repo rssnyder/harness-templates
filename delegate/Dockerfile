@@ -1,4 +1,4 @@
-FROM harness/delegate-immutable:22.10.77021
+FROM harness/delegate-immutable:<+pipeline.stages.trigger.spec.serviceConfig.serviceDefinition.spec.artifacts.primary.spec.tag>
 
 USER 0
 
