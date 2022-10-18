@@ -1,0 +1,26 @@
+trigger:
+  name: release
+  identifier: release
+  enabled: true
+  description: ""
+  tags: {}
+  orgIdentifier: default
+  projectIdentifier: Default_Project_1659484619331
+  pipelineIdentifier: dst
+  source:
+    type: Webhook
+    spec:
+      type: Custom
+      spec:
+        payloadConditions: []
+        headerConditions: []
+  inputYaml: |
+    pipeline:
+      identifier: dst
+      properties:
+        ci:
+          codebase:
+            build:
+              type: tag
+              spec:
+                tag: <+eventPayload.release.tag_name>
