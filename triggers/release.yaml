@@ -2,8 +2,6 @@ trigger:
   name: release
   identifier: release
   enabled: true
-  description: ""
-  tags: {}
   orgIdentifier: default
   projectIdentifier: Default_Project_1659484619331
   pipelineIdentifier: dst
@@ -12,8 +10,10 @@ trigger:
     spec:
       type: Custom
       spec:
-        payloadConditions: []
-        headerConditions: []
+        payloadConditions:
+          - key: <+trigger.payload.action>
+            operator: Equals
+            value: created
   inputYaml: |
     pipeline:
       identifier: dst
