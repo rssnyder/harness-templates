@@ -15,6 +15,6 @@ template:
       source:
         type: Inline
         spec:
-          script: kubectl delete ns <+stage.spec.infrastructure.infrastructureDefinition.spec.namespace>
+          script: kubectl delete ns <+infra.namespace>
       environmentVariables: []
       outputVariables: []
