@@ -30,11 +30,11 @@ repo_gpgcheck=0 \n\
 gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg" | tee /etc/yum.repos.d/google-cloud-sdk.repo && microdnf install google-cloud-cli
 
 # Install Azure CLI
-RUN echo -e "[azure-cli] \n\
-name=Azure CLI \n\
-baseurl=https://packages.microsoft.com/yumrepos/azure-cli \n\
-enabled=1 \n\
-gpgcheck=1 \n\
-gpgkey=https://packages.microsoft.com/keys/microsoft.asc" | tee /etc/yum.repos.d/azure-cli.repo && microdnf install azure-cli
+# RUN echo -e "[azure-cli] \n\
+# name=Azure CLI \n\
+# baseurl=https://packages.microsoft.com/yumrepos/azure-cli \n\
+# enabled=1 \n\
+# gpgcheck=1 \n\
+# gpgkey=https://packages.microsoft.com/keys/microsoft.asc" | tee /etc/yum.repos.d/azure-cli.repo && microdnf install azure-cli
 
 USER 1001
