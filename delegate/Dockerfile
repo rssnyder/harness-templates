@@ -10,13 +10,13 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
 
 # Install TF
 RUN curl -O -L  https://releases.hashicorp.com/terraform/1.3.1/terraform_1.3.1_linux_amd64.zip \
-  && unzip terraform_1.3.1_linux_amd64.zip \
+  && unzip -q terraform_1.3.1_linux_amd64.zip \
   && mv ./terraform /usr/bin/ \
   && terraform --version
 
 # Install AWS CLI
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
-  && unzip awscliv2.zip \
+  && unzip -q awscliv2.zip \
   && ./aws/install \
   && aws --version
 
