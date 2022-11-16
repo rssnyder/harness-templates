@@ -1,0 +1,156 @@
+template:
+  name: deploy_multi_env
+  identifier: deploy_multi_env
+  versionLabel: "1"
+  type: Pipeline
+  projectIdentifier: development
+  orgIdentifier: default
+  tags: {}
+  spec:
+    stages:
+      - stage:
+          name: deploy-dev
+          identifier: deploy
+          description: ""
+          type: Deployment
+          spec:
+            deploymentType: Kubernetes
+            service:
+              serviceRef: <+input>
+              serviceInputs: <+input>
+            environment:
+              environmentRef: dev
+              deployToAll: false
+              infrastructureDefinitions:
+                - identifier: sa
+            execution:
+              steps:
+                - step:
+                    name: create ns
+                    identifier: create_ns
+                    template:
+                      templateRef: create_namespace
+                      versionLabel: "1"
+                - step:
+                    name: Stage Deployment
+                    identifier: stageDeployment
+                    type: K8sBlueGreenDeploy
+                    timeout: 10m
+                    spec:
+                      skipDryRun: false
+                      pruningEnabled: false
+                - step:
+                    name: Swap primary with stage service
+                    identifier: bgSwapServices
+                    type: K8sBGSwapServices
+                    timeout: 10m
+                    spec:
+                      skipDryRun: false
+              rollbackSteps:
+                - step:
+                    name: Swap primary with stage service
+                    identifier: rollbackBgSwapServices
+                    type: K8sBGSwapServices
+                    timeout: 10m
+                    spec:
+                      skipDryRun: false
+                - step:
+                    name: delete ns
+                    identifier: delete_ns
+                    template:
+                      templateRef: delete_namespace
+                      versionLabel: "1"
+          tags: {}
+          failureStrategies:
+            - onFailure:
+                errors:
+                  - AllErrors
+                action:
+                  type: StageRollback
+      - stage:
+          name: approve
+          identifier: approve
+          description: ""
+          type: Approval
+          spec:
+            execution:
+              steps:
+                - step:
+                    name: approve
+                    identifier: approve
+                    type: HarnessApproval
+                    timeout: 1d
+                    spec:
+                      approvalMessage: |-
+                        Please review the following information
+                        and approve the pipeline progression
+                      includePipelineExecutionHistory: true
+                      approvers:
+                        minimumCount: 1
+                        disallowPipelineExecutor: false
+                        userGroups:
+                          - account._account_all_users
+                      approverInputs: []
+          tags: {}
+      - stage:
+          name: deploy-staging
+          identifier: deploystaging
+          description: ""
+          type: Deployment
+          spec:
+            deploymentType: Kubernetes
+            service:
+              useFromStage:
+                stage: deploy
+            environment:
+              environmentRef: stage
+              deployToAll: false
+              infrastructureDefinitions:
+                - identifier: sa
+            execution:
+              steps:
+                - step:
+                    name: create nss
+                    identifier: create_nss
+                    template:
+                      templateRef: create_namespace
+                      versionLabel: "1"
+                - step:
+                    name: Stage Deployment
+                    identifier: stageDeployment
+                    type: K8sBlueGreenDeploy
+                    timeout: 10m
+                    spec:
+                      skipDryRun: false
+                      pruningEnabled: false
+                - step:
+                    name: Swap primary with stage service
+                    identifier: bgSwapServices
+                    type: K8sBGSwapServices
+                    timeout: 10m
+                    spec:
+                      skipDryRun: false
+              rollbackSteps:
+                - step:
+                    name: Swap primary with stage service
+                    identifier: rollbackBgSwapServices
+                    type: K8sBGSwapServices
+                    timeout: 10m
+                    spec:
+                      skipDryRun: false
+                - step:
+                    name: delete ns
+                    identifier: delete_ns
+                    template:
+                      templateRef: delete_namespace
+                      versionLabel: "1"
+          tags: {}
+          failureStrategies:
+            - onFailure:
+                errors:
+                  - AllErrors
+                action:
+                  type: StageRollback
+    variables: []
+    delegateSelectors:
+      - sa-cluster
