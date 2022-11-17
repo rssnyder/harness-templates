@@ -8,7 +8,7 @@ pipeline:
     ci:
       codebase:
         connectorRef: account.rssnyder
-        repoName: rssnyder/harness-templates
+        repoName: harness-templates
         build: <+input>
   stages:
     - stage:
