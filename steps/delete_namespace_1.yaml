@@ -3,8 +3,6 @@ template:
   identifier: delete_namespace
   versionLabel: "1"
   type: Step
-  projectIdentifier: development
-  orgIdentifier: default
   tags: {}
   spec:
     timeout: 10m

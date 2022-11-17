@@ -1,10 +1,14 @@
 template:
-  name: assume role w key
-  identifier: assume_role_w_key
+  name: aws assume role w key
+  identifier: aws_assume_role_w_key
   versionLabel: "1"
   type: Step
-  projectIdentifier: development
-  orgIdentifier: default
+  description: |-
+    Where you need to use the assumed role, set the following ENV (replace STEP_NAME with the name of the template step in your pipeline):
+
+    AWS_ACCESS_KEY_ID: <+execution.steps.STEP_NAME.output.outputVariables.AWS_ACCESS_KEY_ID>
+    AWS_SECRET_ACCESS_KEY: <+execution.steps.STEP_NAME.output.outputVariables.AWS_SECRET_ACCESS_KEY>
+    AWS_SESSION_TOKEN: <+execution.steps.STEP_NAME.output.outputVariables.AWS_SESSION_TOKEN>
   tags: {}
   spec:
     timeout: 10m
@@ -17,13 +21,10 @@ template:
         spec:
           script: |-
             echo "current role: $(aws sts get-caller-identity | jq -r .Arn)"
-
             assume="$(aws sts assume-role --role-arn $TARGET_ROLE_ARN --role-session-name '<+stage.name>-<+pipeline.executionId>')"
-
             export AWS_ACCESS_KEY_ID=$(echo $assume | jq -r .Credentials.AccessKeyId)
             export AWS_SECRET_ACCESS_KEY=$(echo $assume | jq -r .Credentials.SecretAccessKey)
             export AWS_SESSION_TOKEN=$(echo $assume | jq -r .Credentials.SessionToken)
-
             echo "assumed role: $(aws sts get-caller-identity | jq -r .Arn)"
       environmentVariables:
         - name: AWS_DEFAULT_REGION
@@ -48,9 +49,3 @@ template:
         - name: AWS_SESSION_TOKEN
           type: Secret
           value: AWS_SESSION_TOKEN
-  description: |-
-    Where you need to use the assumed role, set the following ENV (replace STEP_NAME with the name of the template step in your pipeline):
-
-    AWS_ACCESS_KEY_ID: <+execution.steps.STEP_NAME.output.outputVariables.AWS_ACCESS_KEY_ID>
-    AWS_SECRET_ACCESS_KEY: <+execution.steps.STEP_NAME.output.outputVariables.AWS_SECRET_ACCESS_KEY>
-    AWS_SESSION_TOKEN: <+execution.steps.STEP_NAME.output.outputVariables.AWS_SESSION_TOKEN>
