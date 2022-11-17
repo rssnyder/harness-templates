@@ -1,5 +1,5 @@
-resource "harness_organization" "this" {
-  identifier  = var.org
+resource "harness_platform_organization" "this" {
+  identifier  = lower(var.org)
   name        = var.org
   description = "A templated organization"
   tags = [
