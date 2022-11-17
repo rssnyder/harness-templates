@@ -40,6 +40,9 @@ pipeline:
                         - name: TF_VAR_org
                           value: <+pipeline.variables.org_name>
                           type: String
+                        - name: TF_VAR_requestor
+                          value: <+pipeline.triggeredBy.email>
+                          type: String
                         - name: AWS_REGION
                           value: us-west-2
                           type: String
@@ -98,6 +101,9 @@ pipeline:
                         environmentVariables:
                           - name: TF_VAR_org
                             value: <+pipeline.variables.org_name>
+                            type: String
+                          - name: TF_VAR_requestor
+                            value: <+pipeline.triggeredBy.email>
                             type: String
                           - name: AWS_REGION
                             value: us-west-2
