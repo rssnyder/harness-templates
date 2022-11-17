@@ -55,7 +55,7 @@ pipeline:
                         - name: HARNESS_ACCOUNT_ID
                           value: <+account.identifier>
                           type: String
-                    provisionerIdentifier: <+pipeline.variables.org_name>
+                    provisionerIdentifier: vendingmachine
                   timeout: 10m
               - step:
                   type: HarnessApproval
@@ -76,7 +76,7 @@ pipeline:
                   name: apply
                   identifier: apply
                   spec:
-                    provisionerIdentifier: <+pipeline.variables.org_name>
+                    provisionerIdentifier: vendingmachine
                     configuration:
                       type: Inline
                       spec:
