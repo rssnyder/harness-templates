@@ -1,0 +1,27 @@
+inputSet:
+  identifier: "default"
+  pipeline:
+    identifier: "delegate"
+    properties:
+      ci:
+        codebase:
+          build:
+            type: "branch"
+            spec:
+              branch: "main"
+    stages:
+    - stage:
+        identifier: "deploy"
+        type: "Deployment"
+        spec:
+          service:
+            serviceInputs:
+              serviceDefinition:
+                type: "Kubernetes"
+                spec:
+                  artifacts:
+                    primary:
+                      primaryArtifactRef: "delegate"
+  name: "default"
+  orgIdentifier: "default"
+  projectIdentifier: "Default_Project_1662659562703"
