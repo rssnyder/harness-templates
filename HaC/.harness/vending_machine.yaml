@@ -1,0 +1,125 @@
+pipeline:
+  name: vending machine
+  identifier: vending_machine
+  projectIdentifier: Default_Project_1662659562703
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: bootstrap
+        identifier: bootstrap
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: TerraformPlan
+                  name: plan
+                  identifier: plan
+                  spec:
+                    configuration:
+                      command: Apply
+                      configFiles:
+                        store:
+                          type: Github
+                          spec:
+                            gitFetchType: Branch
+                            connectorRef: account.rssnyder
+                            repoName: harness-templates
+                            branch: main
+                            folderPath: HaC
+                      secretManagerRef: harnessSecretManager
+                      backendConfig:
+                        type: Inline
+                        spec:
+                          content: |-
+                            bucket = "riley-snyder-harness-io"
+                            key = "HaC/<+account.identifier>/<+pipeline.variables.org_name>"
+                      environmentVariables:
+                        - name: TF_VAR_org
+                          value: <+pipeline.variables.org_name>
+                          type: String
+                        - name: AWS_REGION
+                          value: us-west-2
+                          type: String
+                        - name: AWS_ACCESS_KEY_ID
+                          value: <+secrets.getValue("account.aws_access_key_id")>
+                          type: String
+                        - name: AWS_SECRET_ACCESS_KEY
+                          value: <+secrets.getValue("account.aws_secret_access_key")>
+                          type: String
+                        - name: HARNESS_PLATFORM_API_KEY
+                          value: <+secrets.getValue("account.harness_api_token")>
+                          type: String
+                        - name: HARNESS_ACCOUNT_ID
+                          value: <+account.identifier>
+                          type: String
+                    provisionerIdentifier: <+pipeline.variables.org_name>
+                  timeout: 10m
+              - step:
+                  type: HarnessApproval
+                  name: appove
+                  identifier: appove
+                  spec:
+                    includePipelineExecutionHistory: true
+                    approvers:
+                      userGroups:
+                        - _project_all_users
+                      minimumCount: 1
+                      disallowPipelineExecutor: false
+                    approverInputs: []
+                    approvalMessage: An organization <+pipeline.variables.org_name> was requested by <+pipeline.triggeredBy.name>/<+pipeline.triggeredBy.email>
+                  timeout: 1d
+              - step:
+                  type: TerraformApply
+                  name: apply
+                  identifier: apply
+                  spec:
+                    provisionerIdentifier: <+pipeline.variables.org_name>
+                    configuration:
+                      type: Inline
+                      spec:
+                        configFiles:
+                          store:
+                            type: Github
+                            spec:
+                              gitFetchType: Branch
+                              connectorRef: account.rssnyder
+                              repoName: harness-templates
+                              branch: main
+                              folderPath: HaC
+                        backendConfig:
+                          type: Inline
+                          spec:
+                            content: |-
+                              bucket = "riley-snyder-harness-io"
+                              key = "HaC/<+account.identifier>/<+pipeline.variables.org_name>"
+                        environmentVariables:
+                          - name: TF_VAR_org
+                            value: <+pipeline.variables.org_name>
+                            type: String
+                          - name: AWS_REGION
+                            value: us-west-2
+                            type: String
+                          - name: AWS_ACCESS_KEY_ID
+                            value: <+secrets.getValue("account.aws_access_key_id")>
+                            type: String
+                          - name: AWS_SECRET_ACCESS_KEY
+                            value: <+secrets.getValue("account.aws_secret_access_key")>
+                            type: String
+                          - name: HARNESS_PLATFORM_API_KEY
+                            value: <+secrets.getValue("account.harness_api_token")>
+                            type: String
+                          - name: HARNESS_ACCOUNT_ID
+                            value: <+account.identifier>
+                            type: String
+                  timeout: 10m
+        tags: {}
+  variables:
+    - name: org_name
+      type: String
+      description: ""
+      value: <+input>
+  delegateSelectors:
+    - sa-cluster
