@@ -1,6 +1,10 @@
+locals {
+    org_name = replace(replace(var.org, "/[ -]/", "_"), "/\\W/", "")
+}
+
 resource "harness_platform_organization" "this" {
-  identifier  = lower(var.org)
-  name        = var.org
+  identifier  = lower(local.org_name)
+  name        = local.org_name
   description = "A templated organization"
   tags = [
     "source:git",
