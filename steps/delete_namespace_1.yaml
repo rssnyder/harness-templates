@@ -1,0 +1,18 @@
+template:
+  name: delete namespace
+  identifier: delete_namespace
+  versionLabel: "1"
+  type: Step
+  tags: {}
+  spec:
+    timeout: 10m
+    type: ShellScript
+    spec:
+      shell: Bash
+      onDelegate: true
+      source:
+        type: Inline
+        spec:
+          script: kubectl delete ns <+infra.namespace>
+      environmentVariables: []
+      outputVariables: []
