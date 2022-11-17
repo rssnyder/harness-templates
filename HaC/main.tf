@@ -1,5 +1,5 @@
 locals {
-    org_name = replace(replace(var.org, "/[ -]/", "_"), "/\\W/", "")
+  org_name = replace(replace(var.org, "/[ -]/", "_"), "/\\W/", "")
 }
 
 resource "harness_platform_organization" "this" {
@@ -7,8 +7,8 @@ resource "harness_platform_organization" "this" {
   name        = local.org_name
   description = "A templated organization"
   tags = [
-    "source:git",
-    "git:rssnyder/harness-templates/HaC"
+    "requestor:${var.requestor}",
+    "source:github.com/rssnyder/harness-templates/HaC"
   ]
 }
 
