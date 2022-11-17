@@ -177,24 +177,26 @@ pipeline:
           execution:
             steps:
               - step:
-                  type: BuildAndPushDockerRegistry
-                  name: BnP
-                  identifier: BnP
+                  type: Run
+                  name: publish
+                  identifier: publish
                   spec:
                     connectorRef: account.dockerhub
-                    repo: rileysnyderharnessio/delegate-immutable
-                    tags:
-                      - latest
-                      - <+pipeline.stages.test.spec.execution.steps.get_latest_tag.output.outputVariables.LATEST>
-                    dockerfile: delegate/Dockerfile
-                    buildArgs:
-                      DELEGATE_TAG: <+pipeline.stages.test.spec.execution.steps.get_latest_tag.output.outputVariables.LATEST>
-                    resources:
-                      limits:
-                        memory: 2G
-                        cpu: "1"
+                    image: docker
+                    shell: Sh
+                    command: |-
+                      docker tag rileysnyderharnessio/delegate-immutable:dev rileysnyderharnessio/delegate-immutable:latest
+                      docker push rileysnyderharnessio/delegate-immutable:latest
           sharedPaths:
             - /var/run
+          serviceDependencies:
+            - identifier: docker
+              name: docker
+              type: Service
+              spec:
+                connectorRef: account.dockerhub
+                image: docker:dind
+                privileged: true
   variables: []
   delegateSelectors:
     - sa-cluster
