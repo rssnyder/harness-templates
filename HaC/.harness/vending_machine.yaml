@@ -55,7 +55,7 @@ pipeline:
                         - name: HARNESS_ACCOUNT_ID
                           value: <+account.identifier>
                           type: String
-                    provisionerIdentifier: <+pipeline.executionId>
+                    provisionerIdentifier: <+pipeline.sequenceId>
                   timeout: 10m
               - step:
                   type: HarnessApproval
@@ -76,7 +76,7 @@ pipeline:
                   name: apply
                   identifier: apply
                   spec:
-                    provisionerIdentifier: <+pipeline.executionId>
+                    provisionerIdentifier: <+pipeline.sequenceId>
                     configuration:
                       type: Inline
                       spec:
