@@ -185,6 +185,7 @@ pipeline:
                     image: docker
                     shell: Sh
                     command: |-
+                      docker login -u rileysnyderharnessio -p '<+secrets.getValue("account.dockerhub")>'
                       docker pull rileysnyderharnessio/delegate-immutable:dev
                       docker tag rileysnyderharnessio/delegate-immutable:dev rileysnyderharnessio/delegate-immutable:latest
                       docker push rileysnyderharnessio/delegate-immutable:latest
