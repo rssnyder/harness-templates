@@ -3,14 +3,13 @@ variable "org" {
 }
 
 variable "requestor" {
-  type = string
+  type    = string
+  default = "vending-machine"
 }
 
 variable "approvers" {
-  type = list(string)
-  default = [
-    "4JCQs46YTxKawHSWVW6nLA"
-  ]
+  type    = list(string)
+  default = []
 }
 
 variable "git_connector" {

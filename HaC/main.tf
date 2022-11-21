@@ -11,6 +11,14 @@ resource "harness_platform_organization" "this" {
     "requestor:${var.requestor}",
     "source:github.com/rssnyder/harness-templates/HaC"
   ]
+
+  // vm runs should be case-insensitive
+  // dont change name if ran later with different case
+  lifecycle {
+    ignore_changes = [
+      name
+    ]
+  }
 }
 
 resource "harness_platform_project" "default" {
