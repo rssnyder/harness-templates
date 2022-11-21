@@ -63,3 +63,28 @@ infrastructureDefinition:
   allowSimultaneousDeployments: false
 EOF
 }
+
+resource "harness_platform_input_set" "this" {
+  identifier  = lower(local.org_name)
+  name        = local.org_name
+  org_id      = "default"
+  project_id  = "Default_Project_1662659562703"
+  pipeline_id = "vending_machine"
+  yaml        = <<EOF
+inputSet:
+  identifier: ${lower(local.org_name)}
+  name: ${local.org_name}
+  orgIdentifier: "default"
+  projectIdentifier: "Default_Project_1662659562703"
+  pipeline:
+    identifier: "vending_machine"
+    variables:
+    - name: "org_name"
+      type: "String"
+      value: "${var.org}"
+EOF
+
+  depends_on = [
+    harness_platform_organization.this
+  ]
+}
