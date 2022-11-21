@@ -1,0 +1,27 @@
+trigger:
+  name: push to main
+  identifier: push_to_main
+  enabled: true
+  orgIdentifier: default
+  projectIdentifier: Default_Project_1662659562703
+  pipelineIdentifier: delegate
+  source:
+    type: Webhook
+    spec:
+      type: Github
+      spec:
+        type: Push
+        spec:
+          connectorRef: account.rssnyder
+          autoAbortPreviousExecutions: true
+          payloadConditions:
+            - key: changedFiles
+              operator: StartsWith
+              value: delegate/
+            - key: targetBranch
+              operator: Equals
+              value: main
+          repoName: harness-templates
+  pipelineBranchName: <+trigger.branch>
+  inputSetRefs:
+    - default
