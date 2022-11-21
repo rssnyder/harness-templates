@@ -97,7 +97,7 @@ pipeline:
                           spec:
                             content: |-
                               bucket = "riley-snyder-harness-io"
-                              key = "HaC/<+account.identifier>/<+pipeline.variables.org_name>"
+                              key = "HaC/<+account.identifier>/<+pipeline.variables.org_name.toLowerCase()>"
                         environmentVariables:
                           - name: TF_VAR_org
                             value: <+pipeline.variables.org_name>
