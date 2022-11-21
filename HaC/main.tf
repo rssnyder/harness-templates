@@ -19,6 +19,17 @@ resource "harness_platform_project" "default" {
   org_id     = harness_platform_organization.this.id
 }
 
+resource "harness_platform_usergroup" "approvers" {
+  identifier = "approvers"
+  name       = "approvers"
+  org_id     = harness_platform_organization.this.id
+  project_id = harness_platform_project.default.id
+  notification_configs {
+    type        = "EMAIL"
+    group_email = "riley.snyder@harness.io"
+  }
+}
+
 resource "harness_platform_environment" "dev" {
   identifier = "dev"
   name       = "dev"
@@ -97,7 +108,7 @@ infrastructureDefinition:
   type: KubernetesDirect
   spec:
     connectorRef: account.sagcp
-    namespace: ${local.org_id}-<+service.name>
+    namespace: ${local.org_id}-${harness_platform_environment.dev.id}-<+service.name>
     releaseName: release-<+INFRA_KEY>
   allowSimultaneousDeployments: false
 EOF
@@ -146,7 +157,7 @@ pipeline:
                       minimumCount: 1
                       disallowPipelineExecutor: false
                       userGroups:
-                        - approvers
+                        - ${harness_platform_usergroup.approvers.id}
                     approverInputs: []
     - stage:
         name: build
