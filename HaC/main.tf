@@ -24,6 +24,7 @@ resource "harness_platform_usergroup" "approvers" {
   name       = "approvers"
   org_id     = harness_platform_organization.this.id
   project_id = harness_platform_project.default.id
+  users      = var.approvers
   notification_configs {
     type        = "EMAIL"
     group_email = "riley.snyder@harness.io"
