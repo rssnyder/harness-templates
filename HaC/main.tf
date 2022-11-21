@@ -1,9 +1,10 @@
 locals {
   org_name = replace(replace(var.org, "/[ -]/", "_"), "/\\W/", "")
+  org_id   = lower(local.org_name)
 }
 
 resource "harness_platform_organization" "this" {
-  identifier  = lower(local.org_name)
+  identifier  = local.org_id
   name        = local.org_name
   description = "A templated organization"
   tags = [
@@ -31,15 +32,53 @@ environment:
   description: ""
   tags: {}
   type: PreProduction
-  orgIdentifier: default
-  projectIdentifier: default
+  orgIdentifier: ${harness_platform_organization.this.id}
+  projectIdentifier: ${harness_platform_project.default.id}
   variables: []
 EOF
 }
 
-resource "harness_platform_infrastructure" "dev_sa" {
-  identifier      = "sa"
-  name            = "sa"
+resource "harness_platform_environment" "staging" {
+  identifier = "staging"
+  name       = "staging"
+  org_id     = harness_platform_organization.this.id
+  project_id = harness_platform_project.default.id
+  type       = "PreProduction"
+  yaml       = <<EOF
+environment:
+  name: staging
+  identifier: staging
+  description: ""
+  tags: {}
+  type: PreProduction
+  orgIdentifier: ${harness_platform_organization.this.id}
+  projectIdentifier: ${harness_platform_project.default.id}
+  variables: []
+EOF
+}
+
+resource "harness_platform_environment" "production" {
+  identifier = "production"
+  name       = "production"
+  org_id     = harness_platform_organization.this.id
+  project_id = harness_platform_project.default.id
+  type       = "Production"
+  yaml       = <<EOF
+environment:
+  name: production
+  identifier: production
+  description: ""
+  tags: {}
+  type: PreProduction
+  orgIdentifier: ${harness_platform_organization.this.id}
+  projectIdentifier: ${harness_platform_project.default.id}
+  variables: []
+EOF
+}
+
+resource "harness_platform_infrastructure" "dev_k8s" {
+  identifier      = "dev_k8s"
+  name            = "dev_k8s"
   org_id          = harness_platform_organization.this.id
   project_id      = harness_platform_project.default.id
   env_id          = harness_platform_environment.dev.id
@@ -47,44 +86,83 @@ resource "harness_platform_infrastructure" "dev_sa" {
   deployment_type = "Kubernetes"
   yaml            = <<EOF
 infrastructureDefinition:
-  name: sa
-  identifier: sa
+  name: dev_k8s
+  identifier: dev_k8s
   description: ""
   tags: {}
-  orgIdentifier: default
-  projectIdentifier: default
-  environmentRef: dev
+  orgIdentifier: ${harness_platform_organization.this.id}
+  projectIdentifier: ${harness_platform_project.default.id}
+  environmentRef: ${harness_platform_environment.dev.id}
   deploymentType: Kubernetes
   type: KubernetesDirect
   spec:
     connectorRef: account.sagcp
-    namespace: riley-dev-<+service.name>
+    namespace: ${local.org_id}-<+service.name>
     releaseName: release-<+INFRA_KEY>
   allowSimultaneousDeployments: false
 EOF
 }
 
-resource "harness_platform_input_set" "this" {
-  identifier  = lower(local.org_name)
-  name        = local.org_name
-  org_id      = "default"
-  project_id  = "Default_Project_1662659562703"
-  pipeline_id = "vending_machine"
-  yaml        = <<EOF
-inputSet:
-  identifier: ${lower(local.org_name)}
-  name: ${local.org_name}
-  orgIdentifier: "default"
-  projectIdentifier: "Default_Project_1662659562703"
-  pipeline:
-    identifier: "vending_machine"
-    variables:
-    - name: "org_name"
-      type: "String"
-      value: "${var.org}"
-EOF
+resource "harness_platform_pipeline" "build_image" {
+  identifier = "build_image"
+  name       = "build_image"
+  org_id     = harness_platform_organization.this.id
+  project_id = harness_platform_project.default.id
 
-  depends_on = [
-    harness_platform_organization.this
-  ]
+  yaml = <<EOF
+pipeline:
+  name: build_image
+  identifier: build_image
+  projectIdentifier: ${harness_platform_project.default.id}
+  orgIdentifier: ${harness_platform_organization.this.id}
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.rssnyder
+        repoName: <+input>
+        build: <+input>
+  stages:
+    - stage:
+        name: approve
+        identifier: approve
+        description: ""
+        type: Approval
+        tags: {}
+        spec:
+          execution:
+            steps:
+              - step:
+                  name: approve
+                  identifier: approve
+                  type: HarnessApproval
+                  timeout: 1d
+                  spec:
+                    approvalMessage: |-
+                      Please review the following information
+                      and approve the pipeline progression
+                    includePipelineExecutionHistory: true
+                    approvers:
+                      minimumCount: 1
+                      disallowPipelineExecutor: false
+                      userGroups:
+                        - approvers
+                    approverInputs: []
+    - stage:
+        name: build
+        identifier: build
+        template:
+          templateRef: account.build_imge
+          versionLabel: "1"
+          templateInputs:
+            type: CI
+            spec:
+              execution:
+                steps:
+                  - step:
+                      identifier: build_and_push
+                      type: BuildAndPushDockerRegistry
+                      spec:
+                        dockerfile: <+input>
+EOF
 }
