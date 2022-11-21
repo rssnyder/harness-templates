@@ -5,3 +5,23 @@ variable "org" {
 variable "requestor" {
   type = string
 }
+
+variable "git_connector" {
+  type    = string
+  default = "account.rssnyder"
+}
+
+variable "dev_k8s_connector" {
+  type    = string
+  default = "account.sagcp"
+}
+
+variable "staging_k8s_connector" {
+  type    = string
+  default = "account.sagcp"
+}
+
+variable "production_k8s_connector" {
+  type    = string
+  default = "account.sagcp"
+}
