@@ -1,0 +1,28 @@
+template:
+  name: build imge
+  identifier: build_imge
+  versionLabel: "1"
+  type: Stage
+  tags: {}
+  spec:
+    type: CI
+    spec:
+      cloneCodebase: true
+      platform:
+        os: Linux
+        arch: Amd64
+      runtime:
+        type: Cloud
+        spec: {}
+      execution:
+        steps:
+          - step:
+              type: BuildAndPushDockerRegistry
+              name: build and push
+              identifier: build_and_push
+              spec:
+                connectorRef: account.dockerhub
+                repo: rileysnyderharnessio/<+pipeline.properties.ci.codebase.repoName.toLowerCase()>
+                tags:
+                  - latest
+                dockerfile: <+input>
