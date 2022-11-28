@@ -17,15 +17,8 @@ pipeline:
                   name: assume
                   identifier: assume
                   template:
-                    templateRef: account.aws_assume_role
+                    templateRef: account.aws_assume_sales_admin
                     versionLabel: "1"
-                    templateInputs:
-                      type: ShellScript
-                      spec:
-                        environmentVariables:
-                          - name: TARGET_ROLE_ARN
-                            type: String
-                            value: <+input>
               - step:
                   type: TerraformPlan
                   name: plan
