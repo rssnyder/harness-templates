@@ -42,3 +42,5 @@ template:
         - name: AWS_SESSION_TOKEN
           type: Secret
           value: AWS_SESSION_TOKEN
+      delegateSelectors:
+        - ecs
