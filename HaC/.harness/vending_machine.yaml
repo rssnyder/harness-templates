@@ -14,6 +14,19 @@ pipeline:
           execution:
             steps:
               - step:
+                  name: assume
+                  identifier: assume
+                  template:
+                    templateRef: account.aws_assume_role
+                    versionLabel: "1"
+                    templateInputs:
+                      type: ShellScript
+                      spec:
+                        environmentVariables:
+                          - name: TARGET_ROLE_ARN
+                            type: String
+                            value: <+input>
+              - step:
                   type: TerraformPlan
                   name: plan
                   identifier: plan
@@ -47,16 +60,19 @@ pipeline:
                           value: us-west-2
                           type: String
                         - name: AWS_ACCESS_KEY_ID
-                          value: <+secrets.getValue("account.aws_access_key_id")>
+                          value: <+execution.steps.assume.output.outputVariables.AWS_ACCESS_KEY_ID>
                           type: String
                         - name: AWS_SECRET_ACCESS_KEY
-                          value: <+secrets.getValue("account.aws_secret_access_key")>
+                          value: <+execution.steps.assume.output.outputVariables.AWS_SECRET_ACCESS_KEY>
                           type: String
                         - name: HARNESS_PLATFORM_API_KEY
                           value: <+secrets.getValue("account.harness_api_token")>
                           type: String
                         - name: HARNESS_ACCOUNT_ID
                           value: <+account.identifier>
+                          type: String
+                        - name: AWS_SESSION_TOKEN
+                          value: <+execution.steps.assume.output.outputVariables.AWS_SESSION_TOKEN>
                           type: String
                     provisionerIdentifier: vendingmachine
                   timeout: 10m
@@ -109,16 +125,19 @@ pipeline:
                             value: us-west-2
                             type: String
                           - name: AWS_ACCESS_KEY_ID
-                            value: <+secrets.getValue("account.aws_access_key_id")>
+                            value: <+execution.steps.assume.output.outputVariables.AWS_ACCESS_KEY_ID>
                             type: String
                           - name: AWS_SECRET_ACCESS_KEY
-                            value: <+secrets.getValue("account.aws_secret_access_key")>
+                            value: <+execution.steps.assume.output.outputVariables.AWS_SECRET_ACCESS_KEY>
                             type: String
                           - name: HARNESS_PLATFORM_API_KEY
                             value: <+secrets.getValue("account.harness_api_token")>
                             type: String
                           - name: HARNESS_ACCOUNT_ID
                             value: <+account.identifier>
+                            type: String
+                          - name: AWS_SESSION_TOKEN
+                            value: <+execution.steps.assume.output.outputVariables.AWS_SESSION_TOKEN>
                             type: String
                   timeout: 10m
         tags: {}
