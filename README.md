@@ -1,12 +1,14 @@
 # harness-templates
 
+## external modules
+
+ECS Fargate Delegate: https://github.com/rssnyder/terraform-aws-harness-delegate-ecs-fargate
+
+AWS CCM Enablement: https://github.com/rssnyder/terraform-aws-harness-ccm
+
 # HaC
 
 Harness-as-Code, a vending machine for stamping out harness organizations with pre-configured resources.
-
-# delegate-fargate
-
-Terraform for deploying a delegate using ECS/Fargate.
 
 # delegate
 
