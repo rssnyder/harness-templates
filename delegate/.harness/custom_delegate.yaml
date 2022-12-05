@@ -80,8 +80,8 @@ pipeline:
           execution:
             steps:
               - step:
-                  name: create namespace
-                  identifier: create_namespace
+                  name: createns
+                  identifier: createns
                   template:
                     templateRef: account.create_namespace
                     versionLabel: "1"
@@ -115,8 +115,8 @@ pipeline:
                   timeout: 10m
                   failureStrategies: []
               - step:
-                  name: delete namespace
-                  identifier: delete_namespace
+                  name: deletens
+                  identifier: deletens
                   template:
                     templateRef: account.delete_namespace
                     versionLabel: "1"
@@ -129,8 +129,8 @@ pipeline:
                   spec:
                     skipDryRun: false
               - step:
-                  name: rollback namespace
-                  identifier: rollback_namespace
+                  name: deletensrb
+                  identifier: deletensrb
                   template:
                     templateRef: account.delete_namespace
                     versionLabel: "1"
