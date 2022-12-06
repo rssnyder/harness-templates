@@ -9,10 +9,15 @@ RUN microdnf update -y && microdnf install -y unzip git curl jq
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 # Install TF
-RUN curl -O -L  https://releases.hashicorp.com/terraform/1.3.1/terraform_1.3.1_linux_amd64.zip \
+RUN curl -LO  https://releases.hashicorp.com/terraform/1.3.1/terraform_1.3.1_linux_amd64.zip \
   && unzip -q terraform_1.3.1_linux_amd64.zip \
   && mv ./terraform /usr/bin/ \
   && terraform --version
+
+# Install Terragrunt
+RUN curl -LO https://github.com/gruntwork-io/terragrunt/releases/download/v0.42.3/terragrunt_linux_amd64 \
+  && mv terragrunt_linux_amd64 /usr/bin/terragrunt \
+  && terragrunt --version
 
 # Install AWS CLI
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
