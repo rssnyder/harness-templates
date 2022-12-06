@@ -3,10 +3,13 @@ FROM harness/delegate-immutable:$DELEGATE_TAG
 
 USER 0
 
-RUN microdnf update -y && microdnf install -y unzip git curl jq
+RUN microdnf update -y \
+  && microdnf install -y unzip git curl jq
 
 # Install kubectl
-RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+  && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
+  && kubectl version
 
 # Install TF
 RUN curl -LO  https://releases.hashicorp.com/terraform/1.3.1/terraform_1.3.1_linux_amd64.zip \
@@ -33,7 +36,9 @@ baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el8-x86_64 \n\
 enabled=1 \n\
 gpgcheck=1 \n\
 repo_gpgcheck=0 \n\
-gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg" | tee /etc/yum.repos.d/google-cloud-sdk.repo && microdnf install google-cloud-cli
+gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg" | tee /etc/yum.repos.d/google-cloud-sdk.repo \
+  && microdnf install google-cloud-cli \
+  && gcloud version
 
 # Install Azure CLI
 # RUN echo -e "[azure-cli] \n\
