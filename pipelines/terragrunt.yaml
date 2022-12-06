@@ -5,8 +5,8 @@ pipeline:
   tags: {}
   stages:
   - stage:
-      name: "cdk"
-      identifier: "cdk"
+      name: "terragrunt"
+      identifier: "terragrunt"
       description: ""
       type: "Custom"
       spec:
