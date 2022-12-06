@@ -17,6 +17,7 @@ RUN curl -LO  https://releases.hashicorp.com/terraform/1.3.1/terraform_1.3.1_lin
 # Install Terragrunt
 RUN curl -LO https://github.com/gruntwork-io/terragrunt/releases/download/v0.42.3/terragrunt_linux_amd64 \
   && mv terragrunt_linux_amd64 /usr/bin/terragrunt \
+  && chmod +x /usr/bin/terragrunt \
   && terragrunt --version
 
 # Install AWS CLI
