@@ -1,0 +1,80 @@
+---
+pipeline:
+  projectIdentifier: "development"
+  orgIdentifier: "default"
+  tags: {}
+  stages:
+  - stage:
+      name: "cdk"
+      identifier: "cdk"
+      description: ""
+      type: "Custom"
+      spec:
+        execution:
+          steps:
+          - step:
+              name: "get creds"
+              identifier: "get_creds"
+              template:
+                templateRef: "account.aws_assume_sales_admin"
+                versionLabel: "1"
+          - step:
+              type: "ShellScript"
+              name: "clone repo"
+              identifier: "clone_repo"
+              spec:
+                shell: "Bash"
+                onDelegate: true
+                source:
+                  type: "Inline"
+                  spec:
+                    script: "mkdir <+pipeline.executionId> && cd <+pipeline.executionId>\n\
+                      \necho '<+secrets.getValue(\"account.rssnyder_pem\")>' > ./pem\n\
+                      chmod 600 ./pem\n\nGIT_SSH_COMMAND=\"ssh -o StrictHostKeyChecking=no\
+                      \ -i $(pwd)/pem\" git clone git@github.com:<+pipeline.variables.repo>.git\n\
+                      \nrm ./pem"
+                environmentVariables: []
+                outputVariables: []
+              timeout: "10m"
+          - step:
+              type: "ShellScript"
+              name: "terra_plan"
+              identifier: "terra_plan"
+              spec:
+                shell: "Bash"
+                onDelegate: true
+                source:
+                  type: "Inline"
+                  spec:
+                    script: "cd <+pipeline.executionId>/<+pipeline.variables.repo.split(\"\
+                      /\")[1]>\n\ncd ./<+pipeline.variables.folder>\n\nterragrunt\
+                      \ plan"
+                environmentVariables:
+                - name: "AWS_ACCESS_KEY_ID"
+                  type: "String"
+                  value: "<+execution.steps.get_creds.output.outputVariables.AWS_ACCESS_KEY_ID>"
+                - name: "AWS_SECRET_ACCESS_KEY"
+                  type: "String"
+                  value: "<+execution.steps.get_creds.output.outputVariables. AWS_SECRET_ACCESS_KEY>"
+                - name: "AWS_SESSION_TOKEN"
+                  type: "String"
+                  value: "<+execution.steps.get_creds.output.outputVariables. AWS_SESSION_TOKEN>"
+                - name: "AWS_DEFAULT_REGION"
+                  type: "String"
+                  value: "us-west-2"
+                outputVariables: []
+              timeout: "10m"
+      tags: {}
+  delegateSelectors:
+  - "sa-cluster"
+  variables:
+  - name: "repo"
+    type: "String"
+    description: ""
+    value: "<+input>"
+  - name: "folder"
+    type: "String"
+    description: ""
+    value: "<+input>"
+  identifier: "terragrunt"
+  name: "terragrunt"
