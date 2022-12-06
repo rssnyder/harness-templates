@@ -1,0 +1,28 @@
+template:
+  name: clone repo
+  identifier: clone_repo
+  versionLabel: "1"
+  type: Step
+  tags: {}
+  spec:
+    timeout: 10m
+    type: ShellScript
+    spec:
+      shell: Bash
+      onDelegate: true
+      source:
+        type: Inline
+        spec:
+          script: |-
+            mkdir <+pipeline.executionId> && cd <+pipeline.executionId>
+            echo '<+secrets.getValue("account.rssnyder_pem")>' > ./pem
+            chmod 600 ./pem
+
+            GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i $(pwd)/pem" git clone git@github.com:$REPO.git
+
+            rm ./pem
+      environmentVariables:
+        - name: REPO
+          type: String
+          value: <+input>
+      outputVariables: []
