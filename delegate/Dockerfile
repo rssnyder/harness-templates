@@ -12,10 +12,16 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
   && kubectl version --client=true
 
 # Install TF
-RUN curl -LO  https://releases.hashicorp.com/terraform/1.3.1/terraform_1.3.1_linux_amd64.zip \
-  && unzip -q terraform_1.3.1_linux_amd64.zip \
-  && mv ./terraform /usr/bin/ \
-  && terraform --version
+# RUN curl -LO  https://releases.hashicorp.com/terraform/1.3.1/terraform_1.3.1_linux_amd64.zip \
+#   && unzip -q terraform_1.3.1_linux_amd64.zip \
+#   && mv ./terraform /usr/bin/ \
+#   && terraform --version
+
+# Install tfenv
+RUN git clone --depth=1 https://github.com/tfutils/tfenv.git ~/.tfenv \
+  && ln -s ~/.tfenv/bin/* /usr/local/bin \
+  && tfenv install latest \
+  && tfenv use latest
 
 # Install Terragrunt
 RUN curl -LO https://github.com/gruntwork-io/terragrunt/releases/download/v0.42.3/terragrunt_linux_amd64 \
