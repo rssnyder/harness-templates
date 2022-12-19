@@ -1,0 +1,21 @@
+template:
+  name: generate_tag
+  identifier: generate_tag
+  versionLabel: "1"
+  type: Step
+  tags: {}
+  spec:
+    timeout: 10m
+    type: ShellScript
+    spec:
+      shell: Bash
+      onDelegate: true
+      source:
+        type: Inline
+        spec:
+          script: export tag="<+artifacts.primary.tag>.<+env.name>.$(date +%Y.%m.%d)"
+      environmentVariables: []
+      outputVariables:
+        - name: tag
+          type: String
+          value: tag
