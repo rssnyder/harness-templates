@@ -1,0 +1,38 @@
+pipeline:
+  name: build generic image
+  identifier: build_generic_image
+  projectIdentifier: Default_Project_1662659562703
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.rssnyder
+        repoName: <+input>
+        build: <+input>
+  stages:
+    - stage:
+        name: build
+        identifier: build
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: dockerhub
+                  identifier: dockerhub
+                  spec:
+                    connectorRef: account.dockerhub
+                    repo: rileysnyderharnessio/<+pipeline.properties.ci.codebase.repoName.toLowerCase()>
+                    tags:
+                      - latest
+                    labels:
+                      org.opencontainers.image.source: https://github.com/rssnyder/<+pipeline.properties.ci.codebase.repoName>
