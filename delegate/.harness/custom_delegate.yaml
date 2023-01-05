@@ -80,6 +80,12 @@ pipeline:
           execution:
             steps:
               - step:
+                  name: create namespace
+                  identifier: create_namespace
+                  template:
+                    templateRef: account.create_namespace
+                    versionLabel: "1"
+              - step:
                   type: K8sRollingDeploy
                   name: Rollout
                   identifier: Rollout
@@ -108,6 +114,12 @@ pipeline:
                       - test
                   timeout: 10m
                   failureStrategies: []
+              - step:
+                  name: delete namespace
+                  identifier: delete_namespace
+                  template:
+                    templateRef: account.delete_namespace
+                    versionLabel: "1"
             rollbackSteps:
               - step:
                   name: Swap primary with stage service
@@ -116,6 +128,12 @@ pipeline:
                   timeout: 10m
                   spec:
                     skipDryRun: false
+              - step:
+                  name: rollback namespace
+                  identifier: rollback_namespace
+                  template:
+                    templateRef: account.delete_namespace
+                    versionLabel: "1"
         tags: {}
         failureStrategies:
           - onFailure:
