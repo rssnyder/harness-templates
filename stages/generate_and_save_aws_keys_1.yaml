@@ -197,3 +197,8 @@ template:
               timeout: 10m
   identifier: generate_and_save_aws_keys
   versionLabel: "1"
+  description: |-
+    Generate AWS access keys (1hr TTL) using a delegate with an instance profile.
+
+    Then upload those access keys to the harness secrets manager for use in other pipeline/connectors.
+  tags: {}
