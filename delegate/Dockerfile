@@ -1,5 +1,5 @@
-ARG DELEGATE_TAG=22.09.76822
-FROM harness/delegate-immutable:$DELEGATE_TAG
+ARG DELEGATE_TAG=latest
+FROM harness/delegate:$DELEGATE_TAG
 
 USER 0
 
