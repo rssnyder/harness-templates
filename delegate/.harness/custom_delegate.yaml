@@ -121,7 +121,7 @@ pipeline:
                       type: Inline
                       spec:
                         script: |-
-                          echo $ACCOUNT_ID
+                          [ "$ACCOUNT_ID" = "<+account.identifier>>" ]
                           aws
                           gcloud
                           kubectl
@@ -146,31 +146,6 @@ pipeline:
                 - AllErrors
               action:
                 type: StageRollback
-    - stage:
-        name: verify
-        identifier: verify
-        description: ""
-        type: Approval
-        spec:
-          execution:
-            steps:
-              - step:
-                  name: verify
-                  identifier: verify
-                  type: HarnessApproval
-                  timeout: 1d
-                  spec:
-                    approvalMessage: |-
-                      Please review the following information
-                      and approve the pipeline progression
-                    includePipelineExecutionHistory: true
-                    approvers:
-                      minimumCount: 1
-                      disallowPipelineExecutor: false
-                      userGroups:
-                        - account._account_all_users
-                    approverInputs: []
-        tags: {}
     - stage:
         name: build
         identifier: build
