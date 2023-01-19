@@ -31,7 +31,7 @@ pipeline:
                   identifier: dockerhub
                   spec:
                     connectorRef: account.dockerhub
-                    repo: rileysnyderharnessio/<+pipeline.properties.ci.codebase.repoName.toLowerCase()>
+                    repo: rssnyder/<+pipeline.properties.ci.codebase.repoName.toLowerCase()>
                     tags:
                       - latest
                     labels:
