@@ -49,12 +49,35 @@ pipeline:
                         memory: 2G
                         cpu: "2"
                   failureStrategies: []
+              - step:
+                  type: Security
+                  name: scan
+                  identifier: scan
+                  spec:
+                    privileged: true
+                    settings:
+                      policy_type: orchestratedScan
+                      scan_type: containerImage
+                      product_name: aqua-trivy
+                      product_config_name: aqua-trivy
+                      container_domain: docker.io
+                      container_project: <+pipeline.stages.test.spec.execution.steps.test.spec.repo>
+                      container_tag: <+pipeline.stages.test.spec.execution.steps.test.spec.tags>
+                      container_type: local_image
           platform:
             os: Linux
             arch: Amd64
           runtime:
             type: Cloud
             spec: {}
+          serviceDependencies:
+            - identifier: dind
+              name: dind
+              type: Service
+              spec:
+                connectorRef: account.dockerhub
+                image: docker:dind
+                privileged: true
     - stage:
         name: deploy
         identifier: deploy
