@@ -12,7 +12,7 @@ pipeline:
         build: <+input>
   stages:
     - stage:
-        name: test
+        name: build
         identifier: test
         type: CI
         spec:
@@ -147,7 +147,7 @@ pipeline:
               action:
                 type: StageRollback
     - stage:
-        name: build
+        name: publish
         identifier: build
         type: CI
         spec:
