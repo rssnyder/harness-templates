@@ -12,7 +12,7 @@ pipeline:
         build: <+input>
   stages:
     - stage:
-        name: test
+        name: build
         identifier: test
         type: CI
         spec:
@@ -40,7 +40,7 @@ pipeline:
                     connectorRef: account.dockerhub
                     repo: rssnyder/delegate
                     tags:
-                      - dev
+                      - <+pipeline.variables.test_tag>
                     dockerfile: delegate/Dockerfile
                     buildArgs:
                       DELEGATE_TAG: <+steps.get_latest_tag.output.outputVariables.LATEST>
@@ -49,12 +49,35 @@ pipeline:
                         memory: 2G
                         cpu: "2"
                   failureStrategies: []
+              - step:
+                  type: Security
+                  name: scan
+                  identifier: scan
+                  spec:
+                    privileged: true
+                    settings:
+                      policy_type: orchestratedScan
+                      scan_type: containerImage
+                      product_name: aqua-trivy
+                      product_config_name: aqua-trivy
+                      container_domain: docker.io
+                      container_project: <+pipeline.stages.test.spec.execution.steps.test.spec.repo>
+                      container_tag: <+pipeline.variables.test_tag>
+                      container_type: local_image
           platform:
             os: Linux
             arch: Amd64
           runtime:
             type: Cloud
             spec: {}
+          serviceDependencies:
+            - identifier: dind
+              name: dind
+              type: Service
+              spec:
+                connectorRef: account.dockerhub
+                image: docker:dind
+                privileged: true
     - stage:
         name: deploy
         identifier: deploy
@@ -98,7 +121,7 @@ pipeline:
                       type: Inline
                       spec:
                         script: |-
-                          echo $ACCOUNT_ID
+                          [ "$ACCOUNT_ID" = "<+account.identifier>>" ]
                           aws
                           gcloud
                           kubectl
@@ -124,32 +147,7 @@ pipeline:
               action:
                 type: StageRollback
     - stage:
-        name: verify
-        identifier: verify
-        description: ""
-        type: Approval
-        spec:
-          execution:
-            steps:
-              - step:
-                  name: verify
-                  identifier: verify
-                  type: HarnessApproval
-                  timeout: 1d
-                  spec:
-                    approvalMessage: |-
-                      Please review the following information
-                      and approve the pipeline progression
-                    includePipelineExecutionHistory: true
-                    approvers:
-                      minimumCount: 1
-                      disallowPipelineExecutor: false
-                      userGroups:
-                        - account._account_all_users
-                    approverInputs: []
-        tags: {}
-    - stage:
-        name: build
+        name: publish
         identifier: build
         type: CI
         spec:
@@ -166,9 +164,9 @@ pipeline:
                     shell: Sh
                     command: |-
                       docker login -u rssnyder -p '<+secrets.getValue("account.dockerhub")>'
-                      docker pull rssnyder/delegate:dev
-                      docker tag rssnyder/delegate:dev rssnyder/delegate:latest
-                      docker tag rssnyder/delegate:dev rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.get_latest_tag.output.outputVariables.LATEST>
+                      docker pull rssnyder/delegate:<+pipeline.variables.test_tag>
+                      docker tag rssnyder/delegate:<+pipeline.variables.test_tag> rssnyder/delegate:latest
+                      docker tag rssnyder/delegate:<+pipeline.variables.test_tag> rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.get_latest_tag.output.outputVariables.LATEST>
                       docker push rssnyder/delegate:latest
                       docker push rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.get_latest_tag.output.outputVariables.LATEST>
           sharedPaths:
@@ -191,6 +189,10 @@ pipeline:
     - name: base_image
       type: String
       description: ""
-      value: harness/delegate-immutable
+      value: harness/delegate
+    - name: test_tag
+      type: String
+      description: ""
+      value: dev
   delegateSelectors:
     - sa-cluster
