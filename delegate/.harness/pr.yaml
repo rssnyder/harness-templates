@@ -1,0 +1,27 @@
+inputSet:
+  identifier: "pr"
+  name: "pr"
+  orgIdentifier: "default"
+  projectIdentifier: "Default_Project_1662659562703"
+  pipeline:
+    identifier: "delegate"
+    properties:
+      ci:
+        codebase:
+          build:
+            type: "PR"
+            spec:
+              number: "<+trigger.prNumber>"
+    stages:
+    - stage:
+        identifier: "deploy"
+        type: "Deployment"
+        spec:
+          service:
+            serviceInputs:
+              serviceDefinition:
+                type: "Kubernetes"
+                spec:
+                  artifacts:
+                    primary:
+                      primaryArtifactRef: "delegate"
