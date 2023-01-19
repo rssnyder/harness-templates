@@ -214,7 +214,7 @@ pipeline:
     - name: base_image
       type: String
       description: ""
-      value: harness/delegate-immutable
+      value: harness/delegate
     - name: test_tag
       type: String
       description: ""
