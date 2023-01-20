@@ -1,5 +1,5 @@
-`rileysnyderharnessio/delegate-immutable:latest`
+`rssnyder/delegate:latest`
 
-`rileysnyderharnessio/delegate-immutable:<harness version>`
-eg: `rileysnyderharnessio/delegate-immutable:22.11.77435`
+`rssnyder/delegate:<harness version>`
+eg: `rssnyder/delegate:23.01.78101`
 
