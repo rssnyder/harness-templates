@@ -64,6 +64,12 @@ pipeline:
                       container_project: <+pipeline.stages.test.spec.execution.steps.test.spec.repo>
                       container_tag: <+pipeline.variables.test_tag>
                       container_type: local_image
+                  failureStrategies:
+                    - onFailure:
+                        errors:
+                          - AllErrors
+                        action:
+                          type: Ignore
           platform:
             os: Linux
             arch: Amd64
