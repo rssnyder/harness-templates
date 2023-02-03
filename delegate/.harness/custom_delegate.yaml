@@ -193,7 +193,7 @@ pipeline:
             spec: {}
         when:
           pipelineStatus: Success
-          condition: <+pipeline.properties.ci.codebase.build.build.spec.branch> == "main"
+          condition: <+codebase.branch> == "main"
   variables:
     - name: base_image
       type: String
