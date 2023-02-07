@@ -117,12 +117,12 @@ pipeline:
                   failureStrategies: []
             rollbackSteps:
               - step:
-                  name: Swap primary with stage service
-                  identifier: rollbackBgSwapServices
-                  type: K8sBGSwapServices
-                  timeout: 10m
+                  type: K8sRollingRollback
+                  name: Rolling Rollback_1
+                  identifier: RollingRollback_1
                   spec:
-                    skipDryRun: false
+                    pruningEnabled: false
+                  timeout: 10m
         tags: {}
         failureStrategies:
           - onFailure:
