@@ -55,4 +55,4 @@ gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg" | tee /etc
 # gpgkey=https://packages.microsoft.com/keys/microsoft.asc" | tee /etc/yum.repos.d/azure-cli.repo && microdnf install azure-cli
 
 RUN curl -o- -L https://slss.io/install | bash \
-  && mv /opt/harness-delegate/.serverless/bin/serverless /usr/local/bin/
+  && ln -s /opt/harness-delegate/.serverless/bin/serverless /usr/local/bin/serverless
