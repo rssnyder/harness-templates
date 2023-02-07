@@ -106,10 +106,8 @@ pipeline:
                       type: Inline
                       spec:
                         script: |-
-                          [ "$ACCOUNT_ID" = "<+account.identifier>>" ]
-                          aws
-                          gcloud
-                          kubectl
+                          [[ "$ACCOUNT_ID" == <+account.identifier>​​ ]]
+                          aws --help && gcloud --help && kubectl --help && terraform --help && terragrunt --help && serverless --help
                     environmentVariables: []
                     outputVariables: []
                     delegateSelectors:
