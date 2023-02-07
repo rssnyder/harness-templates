@@ -106,10 +106,9 @@ pipeline:
                       type: Inline
                       spec:
                         script: |-
-                          [ "$ACCOUNT_ID" = "<+account.identifier>>" ]
-                          aws
-                          gcloud
-                          kubectl
+                          [[ "$ACCOUNT_ID" == <+account.identifier>​​ ]]
+                          echo $PATH
+                          aws --help && gcloud --help && kubectl --help && terraform --help && terragrunt --help && serverless --help
                     environmentVariables: []
                     outputVariables: []
                     delegateSelectors:
@@ -118,12 +117,12 @@ pipeline:
                   failureStrategies: []
             rollbackSteps:
               - step:
-                  name: Swap primary with stage service
-                  identifier: rollbackBgSwapServices
-                  type: K8sBGSwapServices
-                  timeout: 10m
+                  type: K8sRollingRollback
+                  name: Rolling Rollback_1
+                  identifier: RollingRollback_1
                   spec:
-                    skipDryRun: false
+                    pruningEnabled: false
+                  timeout: 10m
         tags: {}
         failureStrategies:
           - onFailure:
