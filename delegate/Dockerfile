@@ -53,3 +53,5 @@ gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg" | tee /etc
 # enabled=1 \n\
 # gpgcheck=1 \n\
 # gpgkey=https://packages.microsoft.com/keys/microsoft.asc" | tee /etc/yum.repos.d/azure-cli.repo && microdnf install azure-cli
+
+USER 1001
