@@ -56,3 +56,5 @@ gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg" | tee /etc
 
 RUN curl -o- -L https://slss.io/install | bash \
   && ln -s /opt/harness-delegate/.serverless/bin/serverless /usr/local/bin/serverless
+
+# USER 1001
