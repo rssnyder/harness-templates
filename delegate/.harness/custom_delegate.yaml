@@ -29,7 +29,7 @@ pipeline:
                     shell: Sh
                     command: |-
                       apk add curl jq
-                      export LATEST=$(curl -s https://hub.docker.com/v2/repositories/<+pipeline.variables.base_image>/tags\?page_size\=2 | jq -r '.results[].name' | grep -v minimal)
+                      export LATEST=$(curl -s https://hub.docker.com/v2/repositories/<+pipeline.variables.base_image>/tags\?page_size\=2 | jq -r '.results[].name' | grep -v ubi | grep -v minimal | grep -v latest | head -n 1)
                     outputVariables:
                       - name: LATEST
               - step:
