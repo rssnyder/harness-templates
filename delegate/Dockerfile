@@ -1,10 +1,13 @@
 ARG DELEGATE_TAG=latest
-FROM harness/delegate:$DELEGATE_TAG
+ARG DELEGATE_IMAGE=harness/delegate
+FROM $DELEGATE_IMAGE:$DELEGATE_TAG
 
 USER 0
 
 RUN microdnf update -y \
-  && microdnf install -y unzip git curl jq
+  && microdnf install -y unzip git curl jq shadow-utils
+
+RUN useradd -u 1001 -g 0 harness
 
 # Install kubectl
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
@@ -56,3 +59,5 @@ gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg" | tee /etc
 
 RUN curl -o- -L https://slss.io/install | bash \
   && ln -s /opt/harness-delegate/.serverless/bin/serverless /usr/local/bin/serverless
+
+USER 1001
