@@ -88,6 +88,12 @@ pipeline:
           execution:
             steps:
               - step:
+                  name: create
+                  identifier: create
+                  template:
+                    templateRef: account.create_namespace
+                    versionLabel: "1"
+              - step:
                   type: K8sRollingDeploy
                   name: Rollout
                   identifier: Rollout
@@ -108,6 +114,7 @@ pipeline:
                         script: |-
                           [[ "$ACCOUNT_ID" == <+account.identifier>​​ ]]
                           echo $PATH
+                          whoami
                           aws --help && gcloud --help && kubectl --help && terraform --help && terragrunt --help && serverless --help
                     environmentVariables: []
                     outputVariables: []
@@ -115,14 +122,19 @@ pipeline:
                       - test
                   timeout: 10m
                   failureStrategies: []
+              - step:
+                  name: remove
+                  identifier: remove
+                  template:
+                    templateRef: account.delete_namespace
+                    versionLabel: "1"
             rollbackSteps:
               - step:
-                  type: K8sRollingRollback
-                  name: Rolling Rollback_1
-                  identifier: RollingRollback_1
-                  spec:
-                    pruningEnabled: false
-                  timeout: 10m
+                  name: delete
+                  identifier: delete
+                  template:
+                    templateRef: account.delete_namespace
+                    versionLabel: "1"
         tags: {}
         failureStrategies:
           - onFailure:
