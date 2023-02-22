@@ -27,9 +27,9 @@ pipeline:
                     connectorRef: account.dockerhub
                     image: alpine
                     shell: Sh
-                    command: |-
+                    command: |
                       apk add curl jq
-                      export LATEST=$(curl -s https://hub.docker.com/v2/repositories/<+pipeline.variables.base_image>/tags\?page_size\=2 | jq -r '.results[].name' | grep -v minimal)
+                      export LATEST=$(curl -s https://hub.docker.com/v2/repositories/<+pipeline.variables.base_image>/tags\?page_size\=10 | jq -r '.results[].name' | grep -v ubi | grep -v minimal | grep -v latest | grep -v 78108 | head -n 1)
                     outputVariables:
                       - name: LATEST
               - step:
@@ -88,6 +88,12 @@ pipeline:
           execution:
             steps:
               - step:
+                  name: create
+                  identifier: create
+                  template:
+                    templateRef: account.create_namespace
+                    versionLabel: "1"
+              - step:
                   type: K8sRollingDeploy
                   name: Rollout
                   identifier: Rollout
@@ -95,6 +101,12 @@ pipeline:
                     skipDryRun: false
                     pruningEnabled: false
                   timeout: 10m
+              - step:
+                  type: Wait
+                  name: wait for delegate
+                  identifier: wait_for_delegate
+                  spec:
+                    duration: 5m
               - step:
                   type: ShellScript
                   name: command on delegate
@@ -108,21 +120,27 @@ pipeline:
                         script: |-
                           [[ "$ACCOUNT_ID" == <+account.identifier>​​ ]]
                           echo $PATH
+                          [[ "$(whoami)" == "harness​​" ]]
                           aws --help && gcloud --help && kubectl --help && terraform --help && terragrunt --help && serverless --help
                     environmentVariables: []
                     outputVariables: []
                     delegateSelectors:
-                      - test
+                      - <+serviceVariables.delegate_name>
                   timeout: 10m
                   failureStrategies: []
+              - step:
+                  name: remove
+                  identifier: remove
+                  template:
+                    templateRef: account.delete_namespace
+                    versionLabel: "1"
             rollbackSteps:
               - step:
-                  type: K8sRollingRollback
-                  name: Rolling Rollback_1
-                  identifier: RollingRollback_1
-                  spec:
-                    pruningEnabled: false
-                  timeout: 10m
+                  name: delete
+                  identifier: delete
+                  template:
+                    templateRef: account.delete_namespace
+                    versionLabel: "1"
         tags: {}
         failureStrategies:
           - onFailure:
@@ -171,7 +189,7 @@ pipeline:
             spec: {}
         when:
           pipelineStatus: Success
-          condition: <+codebase.branch> == "main"
+          condition: <+codebase.sourceBranch> == "main"
   variables:
     - name: base_image
       type: String
