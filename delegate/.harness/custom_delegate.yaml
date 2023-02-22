@@ -27,10 +27,9 @@ pipeline:
                     connectorRef: account.dockerhub
                     image: alpine
                     shell: Sh
-                    command: |-
+                    command: |
                       apk add curl jq
-                      # export LATEST=$(curl -s https://hub.docker.com/v2/repositories/<+pipeline.variables.base_image>/tags\?page_size\=10 | jq -r '.results[].name' | grep -v ubi | grep -v minimal | grep -v latest | head -n 1)
-                      export LATEST=23.02.78306
+                      export LATEST=$(curl -s https://hub.docker.com/v2/repositories/<+pipeline.variables.base_image>/tags\?page_size\=10 | jq -r '.results[].name' | grep -v ubi | grep -v minimal | grep -v latest | grep -v 78108 | head -n 1)
                     outputVariables:
                       - name: LATEST
               - step:
@@ -102,6 +101,12 @@ pipeline:
                     skipDryRun: false
                     pruningEnabled: false
                   timeout: 10m
+              - step:
+                  type: Wait
+                  name: wait for delegate
+                  identifier: wait_for_delegate
+                  spec:
+                    duration: 2m
               - step:
                   type: ShellScript
                   name: command on delegate
