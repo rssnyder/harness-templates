@@ -120,7 +120,7 @@ pipeline:
                         script: |-
                           [[ "$ACCOUNT_ID" == <+account.identifier>​​ ]]
                           echo $PATH
-                          whoami
+                          [[ "$(whoami)" == "harness​​" ]]
                           aws --help && gcloud --help && kubectl --help && terraform --help && terragrunt --help && serverless --help
                     environmentVariables: []
                     outputVariables: []
