@@ -125,7 +125,7 @@ pipeline:
                     environmentVariables: []
                     outputVariables: []
                     delegateSelectors:
-                      - test
+                      - <+serviceVariables.delegate_name>
                   timeout: 10m
                   failureStrategies: []
               - step:
