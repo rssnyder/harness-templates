@@ -1,0 +1,80 @@
+template:
+  name: postgres_redis
+  identifier: postgres_redis
+  versionLabel: "1"
+  type: StepGroup
+  tags: {}
+  spec:
+    stageType: CI
+    steps:
+      - parallel:
+          - step:
+              type: Background
+              name: postgres
+              identifier: postgres
+              spec:
+                connectorRef: account.dockerhub
+                image: postgres:14.5-alpine
+                shell: Sh
+                envVariables:
+                  POSTGRES_PASSWORD: password
+                portBindings:
+                  "5432": "5432"
+          - step:
+              type: Background
+              name: redis
+              identifier: redis
+              spec:
+                connectorRef: account.dockerhub
+                image: redis:5
+                shell: Sh
+                portBindings:
+                  "6379": "6379"
+          - step:
+              type: Run
+              name: check redis
+              identifier: check_redis
+              spec:
+                connectorRef: account.dockerhub
+                image: redis:5
+                shell: Sh
+                command: redis-cli -h redis INFO
+              failureStrategies:
+                - onFailure:
+                    errors:
+                      - AllErrors
+                    action:
+                      type: Retry
+                      spec:
+                        retryCount: 12
+                        retryIntervals:
+                          - 5s
+                        onRetryFailure:
+                          action:
+                            type: Abort
+          - step:
+              type: Run
+              name: check postgres
+              identifier: check_postgres
+              spec:
+                connectorRef: account.dockerhub
+                image: postgres:14.5
+                shell: Sh
+                command: psql -p 5432 -c 'SELECT * FROM pg_settings'
+                envVariables:
+                  PGHOST: postgres
+                  PGPASSWORD: <+execution.steps.postgres.spec.envVariables.POSTGRES_PASSWORD>
+                  PGUSER: postgres
+              failureStrategies:
+                - onFailure:
+                    errors:
+                      - AllErrors
+                    action:
+                      type: Retry
+                      spec:
+                        retryCount: 12
+                        retryIntervals:
+                          - 5s
+                        onRetryFailure:
+                          action:
+                            type: Abort
