@@ -1,0 +1,47 @@
+inputSet:
+  pipeline:
+    identifier: multi_service_input
+    stages:
+      - stage:
+          identifier: dev
+          type: Deployment
+          spec:
+            services:
+              values:
+                - serviceRef: dst
+                  serviceInputs:
+                    serviceDefinition:
+                      type: Kubernetes
+                      spec:
+                        artifacts:
+                          primary:
+                            primaryArtifactRef: ghcr
+                            sources:
+                              - identifier: ghcr
+                                type: DockerRegistry
+                                spec:
+                                  tag: v3.11.0-beta.2
+                - serviceRef: nginx
+                  serviceInputs:
+                    serviceDefinition:
+                      type: Kubernetes
+                      spec:
+                        artifacts:
+                          primary:
+                            primaryArtifactRef: nginx
+                            sources:
+                              - identifier: nginx
+                                type: DockerRegistry
+                                spec:
+                                  tag: stable
+                        variables:
+                          - name: port
+                            type: String
+                            value: "8080"
+                          - name: replicas
+                            type: String
+                            value: "1"
+  name: nginx_dst
+  identifier: nginx_dst
+  orgIdentifier: default
+  projectIdentifier: development
