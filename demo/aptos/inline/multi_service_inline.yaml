@@ -1,0 +1,127 @@
+pipeline:
+  name: multi service
+  identifier: multi_service
+  projectIdentifier: development
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - parallel:
+        - stage:
+            name: dst
+            identifier: dst
+            description: ""
+            type: Deployment
+            spec:
+              deploymentType: Kubernetes
+              service:
+                serviceRef: dst
+                serviceInputs:
+                  serviceDefinition:
+                    type: Kubernetes
+                    spec:
+                      artifacts:
+                        primary:
+                          primaryArtifactRef: <+input>
+                          sources: <+input>
+              environment:
+                environmentRef: dev
+                deployToAll: false
+                infrastructureDefinitions:
+                  - identifier: sagcp
+              execution:
+                steps:
+                  - step:
+                      name: Rollout Deployment
+                      identifier: rolloutDeployment
+                      type: K8sRollingDeploy
+                      timeout: 10m
+                      spec:
+                        skipDryRun: false
+                        pruningEnabled: false
+                  - step:
+                      type: Barrier
+                      name: Barrier_1
+                      identifier: Barrier_1
+                      spec:
+                        barrierRef: deploy_all
+                      timeout: 10m
+                rollbackSteps:
+                  - step:
+                      name: Rollback Rollout Deployment
+                      identifier: rollbackRolloutDeployment
+                      type: K8sRollingRollback
+                      timeout: 10m
+                      spec:
+                        pruningEnabled: false
+            tags: {}
+            failureStrategies:
+              - onFailure:
+                  errors:
+                    - AllErrors
+                  action:
+                    type: StageRollback
+        - stage:
+            name: nginx
+            identifier: nginx
+            description: ""
+            type: Deployment
+            spec:
+              deploymentType: Kubernetes
+              service:
+                serviceRef: nginx
+                serviceInputs:
+                  serviceDefinition:
+                    type: Kubernetes
+                    spec:
+                      artifacts:
+                        primary:
+                          primaryArtifactRef: <+input>
+                          sources: <+input>
+                      variables:
+                        - name: port
+                          type: String
+                          value: <+input>
+                        - name: replicas
+                          type: String
+                          value: <+input>
+              environment:
+                environmentRef: dev
+                deployToAll: false
+                infrastructureDefinitions:
+                  - identifier: sagcp
+              execution:
+                steps:
+                  - step:
+                      name: Rollout Deployment
+                      identifier: rolloutDeployment
+                      type: K8sRollingDeploy
+                      timeout: 10m
+                      spec:
+                        skipDryRun: false
+                        pruningEnabled: false
+                  - step:
+                      type: Barrier
+                      name: Barrier_1
+                      identifier: Barrier_1
+                      spec:
+                        barrierRef: deploy_all
+                      timeout: 10m
+                rollbackSteps:
+                  - step:
+                      name: Rollback Rollout Deployment
+                      identifier: rollbackRolloutDeployment
+                      type: K8sRollingRollback
+                      timeout: 10m
+                      spec:
+                        pruningEnabled: false
+            tags: {}
+            failureStrategies:
+              - onFailure:
+                  errors:
+                    - AllErrors
+                  action:
+                    type: StageRollback
+  flowControl:
+    barriers:
+      - name: deploy_all
+        identifier: deploy_all
