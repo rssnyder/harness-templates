@@ -14,7 +14,6 @@ template:
       image: alpine:latest
       shell: Sh
       command: |-
-        echo "hello, my file is $MY_FOLER/$MY_FILE"
 
         export FILE_TARGET="something else"
       envVariables:
