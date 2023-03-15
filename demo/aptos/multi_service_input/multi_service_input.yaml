@@ -1,5 +1,5 @@
 pipeline:
-  name: multi_service_input
+  name: input multi service
   identifier: multi_service_input
   projectIdentifier: development
   orgIdentifier: default
