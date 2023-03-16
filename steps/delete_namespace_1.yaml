@@ -13,7 +13,7 @@ template:
       source:
         type: Inline
         spec:
-          script: kubectl delete ns <+infra.namespace>
+          script: kubectl delete ns <+infra.namespace.toLowerCase()>
       environmentVariables: []
       outputVariables: []
       delegateSelectors:
