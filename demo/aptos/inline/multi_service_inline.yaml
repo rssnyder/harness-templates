@@ -19,8 +19,7 @@ pipeline:
               environment:
                 environmentRef: dev
                 deployToAll: false
-                infrastructureDefinitions:
-                  - identifier: sagcp
+                infrastructureDefinitions: <+input>
               execution:
                 steps:
                   - step:
