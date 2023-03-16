@@ -1,0 +1,46 @@
+inputSet:
+  name: customerA
+  identifier: customerA
+  orgIdentifier: default
+  projectIdentifier: development
+  pipeline:
+    identifier: multi_service_input
+    stages:
+      - stage:
+          identifier: dev
+          type: Deployment
+          spec:
+            services:
+              values:
+                - serviceRef: dst
+                  serviceInputs:
+                    serviceDefinition:
+                      type: Kubernetes
+                      spec:
+                        artifacts:
+                          primary:
+                            sources:
+                              - identifier: ghcr
+                                type: DockerRegistry
+                                spec:
+                                  tag: <+input>
+                - serviceRef: nginx
+                  serviceInputs:
+                    serviceDefinition:
+                      type: Kubernetes
+                      spec:
+                        artifacts:
+                          primary:
+                            primaryArtifactRef: nginx
+                            sources:
+                              - identifier: nginx
+                                type: DockerRegistry
+                                spec:
+                                  tag: <+input>
+                        variables:
+                          - name: port
+                            type: String
+                            value: "8080"
+                          - name: replicas
+                            type: String
+                            value: "1"
