@@ -16,3 +16,5 @@ template:
           script: kubectl delete ns <+infra.namespace>
       environmentVariables: []
       outputVariables: []
+      delegateSelectors:
+        - sa-cluster
