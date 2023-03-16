@@ -13,7 +13,7 @@ template:
       source:
         type: Inline
         spec:
-          script: kubectl create ns <+infra.namespace> --dry-run=client -o yaml | kubectl apply -f -
+          script: kubectl create ns <+infra.namespace.toLowerCase()> --dry-run=client -o yaml | kubectl apply -f -
       environmentVariables: []
       outputVariables: []
       delegateSelectors:
