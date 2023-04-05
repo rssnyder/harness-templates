@@ -121,7 +121,7 @@ pipeline:
                           [[ "$ACCOUNT_ID" == <+account.identifier>​​ ]]
                           echo $PATH
                           [[ "$(whoami)" == "harness​​" ]]
-                          aws --help && gcloud --help && kubectl --help && terraform --help && terragrunt --help && serverless --help
+                          aws help && gcloud --help && kubectl --help && terraform --help && terragrunt --help && serverless --help
                     environmentVariables: []
                     outputVariables: []
                     delegateSelectors:
