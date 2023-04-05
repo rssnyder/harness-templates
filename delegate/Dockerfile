@@ -5,9 +5,7 @@ FROM $DELEGATE_IMAGE:$DELEGATE_TAG
 USER 0
 
 RUN microdnf update -y \
-  && microdnf install -y unzip git curl jq shadow-utils
-
-RUN useradd -u 1001 -g 0 harness
+  && microdnf install -y unzip curl jq shadow-utils
 
 # Install kubectl
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
