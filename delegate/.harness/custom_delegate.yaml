@@ -189,7 +189,7 @@ pipeline:
             spec: {}
         when:
           pipelineStatus: Success
-          condition: <+codebase.sourceBranch> == "main"
+          condition: <+codebase.branch> == "main"
   variables:
     - name: base_image
       type: String
