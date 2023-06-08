@@ -44,6 +44,8 @@ pipeline:
                       chmod 600 ${PKEY}
                       export GIT_SSH_COMMAND="ssh -i ${PKEY} -o IdentitiesOnly=yes -o StrictHostKeyChecking=no"
 
+                      git config --global user.name "Riley Snyder"
+
                       git status
                       git remote show origin
                     outputVariables:
