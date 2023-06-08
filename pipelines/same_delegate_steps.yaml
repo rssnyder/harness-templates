@@ -33,4 +33,34 @@ pipeline:
                       - name: HOSTNAME
                         type: String
                         value: HOSTNAME
+              - step:
+                  type: ShellScript
+                  name: use same delegate
+                  identifier: use_same_delegate
+                  spec:
+                    delegateSelectors:
+                      - <+pipeline.stages.example.spec.execution.steps.select_random_delegate.output.outputVariables.HOSTNAME>
+                    shell: Bash
+                    onDelegate: true
+                    source:
+                      type: Inline
+                      spec:
+                        script: echo "this should run on the same delegate as the first step"
+                    environmentVariables: []
+                    outputVariables: []
+                  timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: use random delegate
+                  identifier: use_random_delegate
+                  timeout: 10m
+                  spec:
+                    shell: Bash
+                    onDelegate: true
+                    source:
+                      type: Inline
+                      spec:
+                        script: echo "this will not run on the same delegate"
+                    environmentVariables: []
+                    outputVariables: []
         tags: {}
