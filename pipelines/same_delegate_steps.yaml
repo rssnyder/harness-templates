@@ -1,0 +1,36 @@
+pipeline:
+  name: same_delegate_steps
+  identifier: same_delegate_steps
+  projectIdentifier: Default_Project_1662659562703
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: example
+        identifier: example
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: ShellScript
+                  name: select random delegate
+                  identifier: select_random_delegate
+                  timeout: 10m
+                  spec:
+                    shell: Bash
+                    onDelegate: true
+                    source:
+                      type: Inline
+                      spec:
+                        script: |-
+                          echo "hello world"
+
+                          export HOSTNAME
+                    environmentVariables: []
+                    outputVariables:
+                      - name: HOSTNAME
+                        type: String
+                        value: HOSTNAME
+        tags: {}
