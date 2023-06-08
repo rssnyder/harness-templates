@@ -40,7 +40,7 @@ pipeline:
                       PKEY=/root/.ssh/id_rsa
                       mkdir -p /root/.ssh
 
-                      echo '<+secrets.getValue("account.git_ssh")>' > $PKEY
+                      echo '<+secrets.getValue("account.git")>' > $PKEY
                       chmod 600 ${PKEY}
                       export GIT_SSH_COMMAND="ssh -i ${PKEY} -o IdentitiesOnly=yes -o StrictHostKeyChecking=no"
 
