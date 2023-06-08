@@ -1,0 +1,61 @@
+pipeline:
+  name: setup git auth
+  identifier: setup_git_auth
+  projectIdentifier: Default_Project_1662659562703
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.rssnyder
+        repoName: test
+        build: <+input>
+  stages:
+    - stage:
+        name: setup
+        identifier: setup
+        type: CI
+        spec:
+          cloneCodebase: true
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: account.sagcp
+              namespace: riley
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              os: Linux
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: setup git
+                  identifier: setup_git
+                  description: pull down ssh secret and set GIT_SSH_COMMAND
+                  spec:
+                    connectorRef: account.dockerhub
+                    image: alpine/git:latest
+                    shell: Sh
+                    command: |
+                      PKEY=/root/.ssh/id_rsa
+                      mkdir -p /root/.ssh
+
+                      echo '<+secrets.getValue("account.git_ssh")>' > $PKEY
+                      chmod 600 ${PKEY}
+                      export GIT_SSH_COMMAND="ssh -i ${PKEY} -o IdentitiesOnly=yes -o StrictHostKeyChecking=no"
+
+                      git status
+                      git remote show origin
+                    outputVariables:
+                      - name: GIT_SSH_COMMAND
+              - step:
+                  type: Run
+                  name: test git
+                  identifier: test_git
+                  spec:
+                    connectorRef: account.dockerhub
+                    image: alpine/git:latest
+                    shell: Sh
+                    command: git status
+          sharedPaths:
+            - /root
