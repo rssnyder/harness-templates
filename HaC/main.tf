@@ -243,8 +243,8 @@ EOF
 }
 
 resource "harness_platform_pipeline" "build_image_git" {
-  identifier  = "build_image"
-  name        = "build_image"
+  identifier  = "build_image_git"
+  name        = "build_image_git"
   description = "this pipleine will sync to get, and terraform will never overrite it"
   org_id      = harness_platform_organization.this.id
   project_id  = harness_platform_project.default.id
@@ -260,8 +260,8 @@ resource "harness_platform_pipeline" "build_image_git" {
 
   yaml = <<EOF
 pipeline:
-  name: build_image
-  identifier: build_image
+  name: build_image_git
+  identifier: build_image_git
   projectIdentifier: ${harness_platform_project.default.id}
   orgIdentifier: ${harness_platform_organization.this.id}
   tags: {}
