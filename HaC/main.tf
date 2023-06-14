@@ -143,7 +143,7 @@ environment:
   identifier: production
   description: ""
   tags: {}
-  type: PreProduction
+  type: Production
   orgIdentifier: ${harness_platform_organization.this.id}
   projectIdentifier: ${harness_platform_project.default.id}
   variables: []
@@ -178,10 +178,11 @@ EOF
 }
 
 resource "harness_platform_pipeline" "build_image" {
-  identifier = "build_image"
-  name       = "build_image"
-  org_id     = harness_platform_organization.this.id
-  project_id = harness_platform_project.default.id
+  identifier  = "build_image"
+  name        = "build_image"
+  description = "this pipleine will be overriden by the yaml in the terraform"
+  org_id      = harness_platform_organization.this.id
+  project_id  = harness_platform_project.default.id
 
   yaml = <<EOF
 pipeline:
@@ -239,4 +240,83 @@ pipeline:
                       spec:
                         dockerfile: <+input>
 EOF
+}
+
+resource "harness_platform_pipeline" "build_image_git" {
+  identifier  = "build_image"
+  name        = "build_image"
+  description = "this pipleine will sync to get, and terraform will never overrite it"
+  org_id      = harness_platform_organization.this.id
+  project_id  = harness_platform_project.default.id
+  
+  git_details {
+    branch_name    = "main"
+    commit_message = "creating pipeline"
+    file_path      = ".example/tf_module_pipeline.yml"
+    connector_ref  = "account.rssnyder"
+    store_type     = "REMOTE"
+    repo_name      = "test"
+  }
+
+  yaml = <<EOF
+pipeline:
+  name: build_image
+  identifier: build_image
+  projectIdentifier: ${harness_platform_project.default.id}
+  orgIdentifier: ${harness_platform_organization.this.id}
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: ${var.git_connector}
+        repoName: <+input>
+        build: <+input>
+  stages:
+    - stage:
+        name: approve
+        identifier: approve
+        description: ""
+        type: Approval
+        tags: {}
+        spec:
+          execution:
+            steps:
+              - step:
+                  name: approve
+                  identifier: approve
+                  type: HarnessApproval
+                  timeout: 1d
+                  spec:
+                    approvalMessage: |-
+                      Please review the following information
+                      and approve the pipeline progression
+                    includePipelineExecutionHistory: true
+                    approvers:
+                      minimumCount: 1
+                      disallowPipelineExecutor: false
+                      userGroups:
+                        - ${harness_platform_usergroup.approvers.id}
+                    approverInputs: []
+    - stage:
+        name: build
+        identifier: build
+        template:
+          templateRef: account.build_imge
+          versionLabel: "1"
+          templateInputs:
+            type: CI
+            spec:
+              execution:
+                steps:
+                  - step:
+                      identifier: build_and_push
+                      type: BuildAndPushDockerRegistry
+                      spec:
+                        dockerfile: <+input>
+EOF
+  lifecycle {
+    ignore_changes = [
+      yaml,
+    ]
+  }
 }
