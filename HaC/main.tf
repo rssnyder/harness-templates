@@ -250,7 +250,7 @@ resource "harness_platform_pipeline" "build_image_git" {
   project_id  = harness_platform_project.default.id
   
   git_details {
-    branch_name    = "main"
+    branch_name    = "master"
     commit_message = "creating pipeline"
     file_path      = ".example/tf_module_pipeline.yml"
     connector_ref  = "account.rssnyder"
