@@ -19,6 +19,37 @@ pipeline:
           cloneCodebase: true
           execution:
             steps:
+              - parallel:
+                  - step:
+                      type: Background
+                      name: dind
+                      identifier: dind
+                      spec:
+                        connectorRef: account.dockerhub
+                        image: docker:dind
+                        shell: Sh
+                  - step:
+                      type: Run
+                      name: check
+                      identifier: check
+                      spec:
+                        connectorRef: account.dockerhub
+                        image: docker:latest
+                        shell: Sh
+                        command: docker ps
+                      failureStrategies:
+                        - onFailure:
+                            errors:
+                              - AllErrors
+                            action:
+                              type: Retry
+                              spec:
+                                retryCount: 10
+                                retryIntervals:
+                                  - 5s
+                                onRetryFailure:
+                                  action:
+                                    type: MarkAsFailure
               - step:
                   type: Run
                   name: get latest tag
@@ -29,7 +60,7 @@ pipeline:
                     shell: Sh
                     command: |
                       apk add curl jq
-                      export LATEST=$(curl -s https://hub.docker.com/v2/repositories/<+pipeline.variables.base_image>/tags\?page_size\=10 | jq -r '.results[].name' | grep -v ubi | grep -v minimal | grep -v latest | grep -v 78108 | head -n 1)
+                      export LATEST=$(curl 'https://app.harness.io/ng/api/delegate-setup/latest-supported-version?accountIdentifier=<+account.identifier>' -H 'x-api-key: <+secrets.getValue("account.harness_api_token")>' | jq '.resource.latestSupportedVersion')
                     outputVariables:
                       - name: LATEST
               - step:
@@ -55,14 +86,6 @@ pipeline:
           runtime:
             type: Cloud
             spec: {}
-          serviceDependencies:
-            - identifier: dind
-              name: dind
-              type: Service
-              spec:
-                connectorRef: account.dockerhub
-                image: docker:dind
-                privileged: true
     - stage:
         name: deploy
         identifier: deploy
@@ -156,6 +179,37 @@ pipeline:
           cloneCodebase: true
           execution:
             steps:
+              - parallel:
+                  - step:
+                      type: Background
+                      name: dind
+                      identifier: dind
+                      spec:
+                        connectorRef: account.dockerhub
+                        image: docker:dind
+                        shell: Sh
+                  - step:
+                      type: Run
+                      name: check
+                      identifier: check
+                      spec:
+                        connectorRef: account.dockerhub
+                        image: docker:latest
+                        shell: Sh
+                        command: docker ps
+                      failureStrategies:
+                        - onFailure:
+                            errors:
+                              - AllErrors
+                            action:
+                              type: Retry
+                              spec:
+                                retryCount: 10
+                                retryIntervals:
+                                  - 5s
+                                onRetryFailure:
+                                  action:
+                                    type: MarkAsFailure
               - step:
                   type: Run
                   name: publish
@@ -173,14 +227,6 @@ pipeline:
                       docker push rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.get_latest_tag.output.outputVariables.LATEST>
           sharedPaths:
             - /var/run
-          serviceDependencies:
-            - identifier: docker
-              name: docker
-              type: Service
-              spec:
-                connectorRef: account.dockerhub
-                image: docker:dind
-                privileged: true
           platform:
             os: Linux
             arch: Amd64
