@@ -48,14 +48,14 @@ gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg" | tee /etc
   && gcloud version
 
 # Install Azure CLI
-# RUN echo -e "[azure-cli] \n\
-# name=Azure CLI \n\
-# baseurl=https://packages.microsoft.com/yumrepos/azure-cli \n\
-# enabled=1 \n\
-# gpgcheck=1 \n\
-# gpgkey=https://packages.microsoft.com/keys/microsoft.asc" | tee /etc/yum.repos.d/azure-cli.repo && microdnf install azure-cli
+RUN echo -e "[azure-cli] \n\
+name=Azure CLI \n\
+baseurl=https://packages.microsoft.com/yumrepos/azure-cli \n\
+enabled=1 \n\
+gpgcheck=1 \n\
+gpgkey=https://packages.microsoft.com/keys/microsoft.asc" | tee /etc/yum.repos.d/azure-cli.repo && microdnf install azure-cli
 
 RUN curl -o- -L https://slss.io/install | bash \
   && ln -s /opt/harness-delegate/.serverless/bin/serverless /usr/local/bin/serverless
 
-USER 1001
+USER harness
