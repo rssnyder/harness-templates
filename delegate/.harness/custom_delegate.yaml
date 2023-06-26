@@ -60,8 +60,8 @@ pipeline:
                     shell: Sh
                     command: |
                       apk add curl jq
-                      curl --location 'https://app.harness.io/ng/api/delegate-setup/latest-supported-version?accountIdentifier=<+account.identifier>' --header 'x-api-key: <+secrets.getValue("acount.harness_api_token")>' | jq '.'
-                      export LATEST=$(curl --location 'https://app.harness.io/ng/api/delegate-setup/latest-supported-version?accountIdentifier=<+account.identifier>' --header 'x-api-key: <+secrets.getValue("acount.harness_api_token")>' | jq '.resource.latestSupportedVersion')
+                      curl 'https://app.harness.io/ng/api/delegate-setup/latest-supported-version?accountIdentifier=<+account.identifier>' -H 'x-api-key: <+secrets.getValue("acount.harness_api_token")>' | jq '.'
+                      export LATEST=$(curl 'https://app.harness.io/ng/api/delegate-setup/latest-supported-version?accountIdentifier=<+account.identifier>' -H 'x-api-key: <+secrets.getValue("acount.harness_api_token")>' | jq '.resource.latestSupportedVersion')
                     outputVariables:
                       - name: LATEST
               - step:
