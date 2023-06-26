@@ -79,7 +79,19 @@ pipeline:
                       limits:
                         memory: 2G
                         cpu: "2"
-                  failureStrategies: []
+                  failureStrategies:
+                    - onFailure:
+                        errors:
+                          - AllErrors
+                        action:
+                          type: Retry
+                          spec:
+                            retryCount: 5
+                            retryIntervals:
+                              - 10s
+                            onRetryFailure:
+                              action:
+                                type: MarkAsFailure
           platform:
             os: Linux
             arch: Amd64
