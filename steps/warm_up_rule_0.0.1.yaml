@@ -17,7 +17,7 @@ template:
           value: <+input>.default(5)
           type: String
       outputVariables: []
-      requestBody: "{\"idle_time_mins\":<+spec.inputVariables.idle_time_mins>,\"forced_trigger\":true}"
+      requestBody: "{\"idle_time_mins\":<+spec.inputVariables.idle_time_mins>,\"forced_trigger\":true,\"source\":\"<+org.identifier>.<+project.identifier>.<+pipeline.identifier>.<+pipeline.executionId>\"}"
       assertion: <+httpResponseCode> == 200
     timeout: 10s
   identifier: warm_up_rule
