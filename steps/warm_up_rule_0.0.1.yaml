@@ -1,0 +1,24 @@
+template:
+  name: warm up rule
+  type: Step
+  spec:
+    type: Http
+    spec:
+      url: https://app.harness.io/gateway/lw/api/accounts/<+account.identifier>/autostopping/rules/<+spec.inputVariables.rule_id>/warmup?routingId=<+account.identifier>&accountIdentifier=<+account.identifier>
+      method: POST
+      headers:
+        - key: x-api-key
+          value: <+input>
+      inputVariables:
+        - name: rule_id
+          value: <+input>
+          type: String
+        - name: idle_time_mins
+          value: <+input>.default(5)
+          type: String
+      outputVariables: []
+      requestBody: "{\"idle_time_mins\":<+spec.inputVariables.idle_time_mins>,\"forced_trigger\":true}"
+      assertion: <+httpResponseCode> == 200
+    timeout: 10s
+  identifier: warm_up_rule
+  versionLabel: 0.0.1
