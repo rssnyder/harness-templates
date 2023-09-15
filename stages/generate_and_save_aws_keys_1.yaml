@@ -15,7 +15,7 @@ template:
                 source:
                   type: Inline
                   spec:
-                    script: |-
+                    script: |
                       echo "current role: $(aws sts get-caller-identity | jq -r .Arn)"
 
                       export SESSION_NAME='<+pipeline.name.replace(" ", "-").replace("_", "-")>-<+pipeline.sequenceId>'
@@ -24,11 +24,17 @@ template:
 
                       assume="$(aws sts assume-role --role-arn $TARGET_ROLE_ARN --role-session-name $SESSION_NAME)"
 
-                      export AWS_ACCESS_KEY_ID=$(echo $assume | jq -r .Credentials.AccessKeyId)
-                      export AWS_SECRET_ACCESS_KEY=$(echo $assume | jq -r .Credentials.SecretAccessKey)
-                      export AWS_SESSION_TOKEN=$(echo $assume | jq -r .Credentials.SessionToken)
+                      if [ $? -eq 0 ] 
+                      then 
+                        export AWS_ACCESS_KEY_ID=$(echo $assume | jq -r .Credentials.AccessKeyId)
+                        export AWS_SECRET_ACCESS_KEY=$(echo $assume | jq -r .Credentials.SecretAccessKey)
+                        export AWS_SESSION_TOKEN=$(echo $assume | jq -r .Credentials.SessionToken)
 
-                      echo "assumed role: $(aws sts get-caller-identity | jq -r .Arn)"
+                        echo "assumed role: $(aws sts get-caller-identity | jq -r .Arn)"
+                      else 
+                        echo "Could not assume role"
+                        exit 1
+                      fi
                 environmentVariables:
                   - name: AWS_DEFAULT_REGION
                     type: String
