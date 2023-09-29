@@ -19,5 +19,3 @@ template:
             kubectl create ns <+infra.namespace.toLowerCase()> --dry-run=client -o yaml | kubectl apply -f -
       environmentVariables: []
       outputVariables: []
-      delegateSelectors:
-        - sa-cluster
