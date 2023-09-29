@@ -14,7 +14,7 @@ template:
         type: Inline
         spec:
           script: |-
-            xport KUBECONFIG=${HARNESS_KUBE_CONFIG_PATH}
+            export KUBECONFIG=${HARNESS_KUBE_CONFIG_PATH}
 
             kubectl create ns <+infra.namespace.toLowerCase()> --dry-run=client -o yaml | kubectl apply -f -
       environmentVariables: []
