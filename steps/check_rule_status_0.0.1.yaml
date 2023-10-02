@@ -6,7 +6,7 @@ template:
   tags: {}
   spec:
     type: Http
-    timeout: 10s
+    timeout: 1m
     spec:
       url: https://app.harness.io/gateway/lw/api/accounts/<+account.identifier>/autostopping/rules/<+spec.inputVariables.rule_id>/health?routingId=<+account.identifier>&accountIdentifier=<+account.identifier>
       method: GET
