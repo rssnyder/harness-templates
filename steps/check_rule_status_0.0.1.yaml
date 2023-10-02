@@ -1,0 +1,18 @@
+template:
+  name: check rule status
+  identifier: check_rule_status
+  versionLabel: 0.0.1
+  type: Step
+  tags: {}
+  spec:
+    type: Http
+    timeout: 10s
+    spec:
+      url: https://app.harness.io/gateway/lw/api/accounts/<+account.identifier>/autostopping/rules/<+spec.inputVariables.rule_id>/health?routingId=<+account.identifier>&accountIdentifier=<+account.identifier>
+      method: GET
+      headers:
+        - key: x-api-key
+          value: <+input>
+      inputVariables: []
+      outputVariables: []
+      assertion: <+json.object(httpResponseBody).response.state> == "active"
