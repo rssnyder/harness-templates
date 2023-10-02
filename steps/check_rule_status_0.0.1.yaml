@@ -13,6 +13,9 @@ template:
       headers:
         - key: x-api-key
           value: <+input>
-      inputVariables: []
+      inputVariables:
+        - name: rule_id
+          value: <+input>
+          type: String
       outputVariables: []
       assertion: <+json.object(httpResponseBody).response.state> == "active"
