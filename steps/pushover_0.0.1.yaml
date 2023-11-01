@@ -15,10 +15,10 @@ template:
           value: application/x-www-form-urlencoded
       inputVariables:
         - name: token
-          value: <+secrets.getValue("account.pushover_token")>
+          value: <+secrets.getValue("account.PUSHOVER_TOKEN")>
           type: String
         - name: user
-          value: <+secrets.getValue("account.pushover_user")>
+          value: <+secrets.getValue("account.PUSHOVER_USER")>
           type: String
         - name: title
           value: <+input>
