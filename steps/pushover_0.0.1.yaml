@@ -1,0 +1,40 @@
+template:
+  name: pushover
+  identifier: pushover
+  versionLabel: 0.0.1
+  type: Step
+  tags: {}
+  spec:
+    type: Http
+    timeout: 10s
+    spec:
+      url: https://api.pushover.net/1/messages.json
+      method: POST
+      headers:
+        - key: Content-Type
+          value: application/x-www-form-urlencoded
+      inputVariables:
+        - name: token
+          value: <+secrets.getValue("account.pushover_token")>
+          type: String
+        - name: user
+          value: <+secrets.getValue("account.pushover_user")>
+          type: String
+        - name: title
+          value: <+input>
+          type: String
+        - name: message
+          value: <+input>
+          type: String
+        - name: priority
+          value: <+input>.default(0).allowedValues(-1,0,1,2)
+          type: String
+        - name: url
+          value: <+pipeline.executionUrl>
+          type: String
+        - name: url_title
+          value: execution link
+          type: String
+      outputVariables: []
+      requestBody: ""
+      assertion: <+json.object(httpResponseBody).status> == 1
