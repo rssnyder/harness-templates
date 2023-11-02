@@ -6,7 +6,7 @@ template:
   tags: {}
   spec:
     type: Http
-    timeout: 10s
+    timeout: 1m
     spec:
       url: https://api.pushover.net/1/messages.json
       method: POST
@@ -38,3 +38,16 @@ template:
       outputVariables: []
       requestBody: ""
       assertion: <+json.object(httpResponseBody).status> == 1
+    failureStrategies:
+      - onFailure:
+          errors:
+            - AllErrors
+          action:
+            type: Retry
+            spec:
+              retryCount: 5
+              retryIntervals:
+                - 5s
+              onRetryFailure:
+                action:
+                  type: Ignore
