@@ -8,7 +8,7 @@ template:
     type: Http
     timeout: 10s
     spec:
-      url: https://api.pushover.net/1/messages.json
+      url: https://api.pushover.net/1/messages.json?token=<+spec.inputVariables.token>&user=<+spec.inputVariables.user>&title=<+spec.inputVariables.title>&message=<+spec.inputVariables.message>&priority=<+spec.inputVariables.priority>&url='<+spec.inputVariables.url>'&url_title=<+spec.inputVariables.url_title>
       method: POST
       headers:
         - key: Content-Type
