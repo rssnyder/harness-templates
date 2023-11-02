@@ -1,0 +1,59 @@
+pipeline:
+  name: test
+  identifier: test
+  projectIdentifier: home_lab
+  orgIdentifier: default
+  tags: {}
+  variables:
+    - name: inputsets
+      type: String
+      description: ""
+      required: false
+      value: <+input>
+  stages:
+    - stage:
+        name: trigger
+        identifier: trigger
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: ShellScript
+                  name: ShellScript_1
+                  identifier: ShellScript_1
+                  spec:
+                    shell: Bash
+                    onDelegate: true
+                    source:
+                      type: Inline
+                      spec:
+                        script: |-
+                          # Set comma as the delimiter
+                          IFS=','
+
+                          # Read the split inputsets into an array
+                          # based on comma delimiter
+                          read -ra newarr <<< "<+pipeline.variables.inputsets>"
+
+
+                          # Print each value of the array by using
+                          # the loop
+                          for val in "${newarr[@]}";
+                          do
+                            echo "$val"
+                            curl -i -X POST \
+                              'https://app.harness.io/pipeline/api/pipeline/execute/deploy/inputSetList?accountIdentifier=<+account.identifier>&orgIdentifier=<+org.identifier>&projectIdentifier=<+project.identifier>' \
+                              -H 'Content-Type: application/json' \
+                              -H 'x-api-key: <+secrets.getValue("account.harness_api_token")>' \
+                              -d '{
+                                "inputSetReferences": [
+                                  "$val"
+                                ]
+                              }'
+                          done
+                    environmentVariables: []
+                    outputVariables: []
+                  timeout: 10m
+        tags: {}
