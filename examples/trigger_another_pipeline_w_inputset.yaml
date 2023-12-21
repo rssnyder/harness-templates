@@ -39,7 +39,7 @@ pipeline:
                     bucket: s3
                     sourcePath: test.txt
                     endpoint: http://rileysnyder.dev
-                    target: harness/
+                    target: harness/test/
           infrastructure:
             type: KubernetesDirect
             spec:
