@@ -18,12 +18,6 @@ pipeline:
         type: CI
         spec:
           cloneCodebase: false
-          platform:
-            os: Linux
-            arch: Amd64
-          runtime:
-            type: Cloud
-            spec: {}
           execution:
             steps:
               - step:
@@ -31,6 +25,8 @@ pipeline:
                   name: Run_1
                   identifier: Run_1
                   spec:
+                    connectorRef: account.dockerhub
+                    image: alpine
                     shell: Sh
                     command: echo "hello" > test.txt
               - step:
@@ -43,3 +39,11 @@ pipeline:
                     bucket: harness
                     sourcePath: test.txt
                     endpoint: http://s3.rileysnyder.dev
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: account._lab
+              namespace: harness-delegate-ng
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              os: Linux
