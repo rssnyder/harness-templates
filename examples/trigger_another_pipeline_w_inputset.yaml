@@ -43,4 +43,3 @@ pipeline:
                     bucket: harness
                     sourcePath: test.txt
                     endpoint: http://s3.rileysnyder.dev
-                    target: test.txt
