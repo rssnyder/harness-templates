@@ -12,52 +12,6 @@ pipeline:
       value: <+input>
   stages:
     - stage:
-        name: trigger
-        identifier: trigger
-        description: ""
-        type: Custom
-        spec:
-          execution:
-            steps:
-              - step:
-                  type: ShellScript
-                  name: ShellScript_1
-                  identifier: ShellScript_1
-                  spec:
-                    shell: Bash
-                    onDelegate: true
-                    source:
-                      type: Inline
-                      spec:
-                        script: |-
-                          # Set comma as the delimiter
-                          IFS=','
-
-                          # Read the split inputsets into an array
-                          # based on comma delimiter
-                          read -ra newarr <<< "<+pipeline.variables.inputsets>"
-
-
-                          # Print each value of the array by using
-                          # the loop
-                          for val in "${newarr[@]}";
-                          do
-                            echo "$val"
-                            curl -i -X POST \
-                              'https://app.harness.io/pipeline/api/pipeline/execute/deploy/inputSetList?accountIdentifier=<+account.identifier>&orgIdentifier=<+org.identifier>&projectIdentifier=<+project.identifier>' \
-                              -H 'Content-Type: application/json' \
-                              -H 'x-api-key: <+secrets.getValue("account.harness_api_token")>' \
-                              -d '{
-                                "inputSetReferences": [
-                                  "$val"
-                                ]
-                              }'
-                          done
-                    environmentVariables: []
-                    outputVariables: []
-                  timeout: 10m
-        tags: {}
-    - stage:
         name: sfdsfd
         identifier: sfdsfd
         description: ""
@@ -73,13 +27,20 @@ pipeline:
           execution:
             steps:
               - step:
-                  type: BuildAndPushDockerRegistry
-                  name: BuildAndPushDockerRegistry_1sfs
-                  identifier: BuildAndPushDockerRegistry_1sfs
+                  type: Run
+                  name: Run_1
+                  identifier: Run_1
                   spec:
-                    connectorRef: account.gitlab
-                    repo: sdafsdf
-                    tags:
-                      - sdf
-                    buildArgs:
-                      something: <+input>.default("else")
+                    shell: Sh
+                    command: echo "hello" > test.txt
+              - step:
+                  type: S3Upload
+                  name: S3Upload_1
+                  identifier: S3Upload_1
+                  spec:
+                    connectorRef: minio
+                    region: us-east-1
+                    bucket: harness
+                    sourcePath: test.txt
+                    endpoint: http://s3.rileysnyder.dev
+                    target: test.txt
