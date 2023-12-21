@@ -36,9 +36,10 @@ pipeline:
                   spec:
                     connectorRef: minio
                     region: us-east-1
-                    bucket: harness
+                    bucket: s3
                     sourcePath: test.txt
-                    endpoint: http://s3.rileysnyder.dev
+                    endpoint: http://rileysnyder.dev
+                    target: harness/
           infrastructure:
             type: KubernetesDirect
             spec:
