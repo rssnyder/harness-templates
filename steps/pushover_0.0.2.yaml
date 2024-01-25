@@ -1,0 +1,53 @@
+template:
+  name: pushover
+  identifier: pushover
+  type: Step
+  tags: {}
+  spec:
+    type: Http
+    timeout: 1m
+    spec:
+      url: https://api.pushover.net/1/messages.json?token=<+secrets.getValue("account.PUSHOVER_TOKEN")>&user=<+secrets.getValue("account.PUSHOVER_USER")>&title=<+spec.inputVariables.title>&message=<+spec.inputVariables.message>&priority=<+spec.inputVariables.priority>&url='<+spec.inputVariables.url>'&url_title=<+spec.inputVariables.url_title>
+      method: POST
+      headers:
+        - key: Content-Type
+          value: application/x-www-form-urlencoded
+      inputVariables:
+        - name: token
+          value: <+secrets.getValue("account.PUSHOVER_TOKEN")>
+          type: String
+        - name: user
+          value: <+secrets.getValue("account.PUSHOVER_USER")>
+          type: String
+        - name: title
+          value: <+input>
+          type: String
+        - name: message
+          value: <+input>
+          type: String
+        - name: priority
+          value: <+input>.default(0).allowedValues(-1,0,1,2)
+          type: String
+        - name: url
+          value: <+pipeline.executionUrl>
+          type: String
+        - name: url_title
+          value: execution link
+          type: String
+      outputVariables: []
+      requestBody: ""
+      assertion: <+json.object(httpResponseBody).status> == 1
+    failureStrategies:
+      - onFailure:
+          errors:
+            - AllErrors
+          action:
+            type: Retry
+            spec:
+              retryCount: 5
+              retryIntervals:
+                - 5s
+              onRetryFailure:
+                action:
+                  type: Ignore
+  versionLabel: 0.0.2
