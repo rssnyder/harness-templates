@@ -1,0 +1,215 @@
+template:
+  name: generate and save aws keys
+  type: Stage
+  spec:
+    type: Custom
+    spec:
+      execution:
+        steps:
+          - step:
+              timeout: 10m
+              type: ShellScript
+              spec:
+                shell: Bash
+                onDelegate: true
+                source:
+                  type: Inline
+                  spec:
+                    script: |
+                      echo "current role: $(aws sts get-caller-identity | jq -r .Arn)"
+
+                      export SESSION_NAME='<+pipeline.name.replace(" ", "-").replace("_", "-")>-<+pipeline.sequenceId>'
+
+                      echo "attempting: $TARGET_ROLE_ARN/$SESSION_NAME"
+
+                      assume="$(aws sts assume-role --role-arn $TARGET_ROLE_ARN --role-session-name $SESSION_NAME)"
+
+                      if [ $? -eq 0 ] 
+                      then 
+                        export AWS_ACCESS_KEY_ID=$(echo $assume | jq -r .Credentials.AccessKeyId)
+                        export AWS_SECRET_ACCESS_KEY=$(echo $assume | jq -r .Credentials.SecretAccessKey)
+                        export AWS_SESSION_TOKEN=$(echo $assume | jq -r .Credentials.SessionToken)
+
+                        echo "assumed role: $(aws sts get-caller-identity | jq -r .Arn)"
+                      else 
+                        echo "Could not assume role"
+                        exit 1
+                      fi
+                environmentVariables:
+                  - name: AWS_DEFAULT_REGION
+                    type: String
+                    value: us-east-1
+                  - name: TARGET_ROLE_ARN
+                    type: String
+                    value: arn:aws:iam::759984737373:role/rileysnyderharnessio-assumed
+                outputVariables:
+                  - name: AWS_ACCESS_KEY_ID
+                    type: Secret
+                    value: AWS_ACCESS_KEY_ID
+                  - name: AWS_SECRET_ACCESS_KEY
+                    type: Secret
+                    value: AWS_SECRET_ACCESS_KEY
+                  - name: AWS_SESSION_TOKEN
+                    type: Secret
+                    value: AWS_SESSION_TOKEN
+                delegateSelectors:
+                  - ecs
+              name: assume aws role
+              identifier: assume_aws_role
+          - step:
+              type: ShellScript
+              name: upload keys
+              identifier: upload_keys
+              spec:
+                shell: Bash
+                onDelegate: true
+                source:
+                  type: Inline
+                  spec:
+                    script: |-
+                      curl --fail -X POST \
+                        'https://app.harness.io/gateway/ng/api/v2/secrets?accountIdentifier=<+account.identifier>&orgIdentifier=<+org.identifier>&projectIdentifier=<+project.identifier>&privateSecret=false' \
+                        -H 'Content-Type: application/json' \
+                        -H 'x-api-key: <+secrets.getValue("account.harness_api_token")>' \
+                        -d '{
+                          "secret": {
+                            "type": "SecretText",
+                            "name": "AWS_ACCESS_KEY_ID",
+                            "identifier": "AWS_ACCESS_KEY_ID",
+                            "orgIdentifier": "<+org.identifier>",
+                            "projectIdentifier": "<+project.identifier>",
+                            "tags": {
+                              "source": "<+pipeline.execution.url>"
+                            },
+                            "spec": {
+                              "type": "SecretTextSpec",
+                              "secretManagerIdentifier": "harnessSecretManager",
+                              "valueType": "Inline",
+                              "value": "<+execution.steps.assume_aws_role.output.outputVariables.AWS_ACCESS_KEY_ID>"
+                            }
+                          }
+                        }' || curl --fail -X PUT \
+                        'https://app.harness.io/gateway/ng/api/v2/secrets/AWS_ACCESS_KEY_ID?accountIdentifier=<+account.identifier>&orgIdentifier=<+org.identifier>&projectIdentifier=<+project.identifier>&privateSecret=false' \
+                        -H 'Content-Type: application/json' \
+                        -H 'x-api-key: <+secrets.getValue("account.harness_api_token")>' \
+                        -d '{
+                          "secret": {
+                            "type": "SecretText",
+                            "name": "AWS_ACCESS_KEY_ID",
+                            "identifier": "AWS_ACCESS_KEY_ID",
+                            "orgIdentifier": "<+org.identifier>",
+                            "projectIdentifier": "<+project.identifier>",
+                            "tags": {
+                              "source": "<+pipeline.execution.url>"
+                            },
+                            "spec": {
+                              "type": "SecretTextSpec",
+                              "secretManagerIdentifier": "harnessSecretManager",
+                              "valueType": "Inline",
+                              "value": "<+execution.steps.assume_aws_role.output.outputVariables.AWS_ACCESS_KEY_ID>"
+                            }
+                          }
+                        }'
+
+                      curl --fail -X POST \
+                        'https://app.harness.io/gateway/ng/api/v2/secrets?accountIdentifier=<+account.identifier>&orgIdentifier=<+org.identifier>&projectIdentifier=<+project.identifier>&privateSecret=false' \
+                        -H 'Content-Type: application/json' \
+                        -H 'x-api-key: <+secrets.getValue("account.harness_api_token")>' \
+                        -d '{
+                          "secret": {
+                            "type": "SecretText",
+                            "name": "AWS_SECRET_ACCESS_KEY",
+                            "identifier": "AWS_SECRET_ACCESS_KEY",
+                            "orgIdentifier": "<+org.identifier>",
+                            "projectIdentifier": "<+project.identifier>",
+                            "tags": {
+                              "source": "<+pipeline.execution.url>"
+                            },
+                            "spec": {
+                              "type": "SecretTextSpec",
+                              "secretManagerIdentifier": "harnessSecretManager",
+                              "valueType": "Inline",
+                              "value": "<+execution.steps.assume_aws_role.output.outputVariables.AWS_SECRET_ACCESS_KEY>"
+                            }
+                          }
+                        }' || curl --fail -X PUT \
+                        'https://app.harness.io/gateway/ng/api/v2/secrets/AWS_SECRET_ACCESS_KEY?accountIdentifier=<+account.identifier>&orgIdentifier=<+org.identifier>&projectIdentifier=<+project.identifier>&privateSecret=false' \
+                        -H 'Content-Type: application/json' \
+                        -H 'x-api-key: <+secrets.getValue("account.harness_api_token")>' \
+                        -d '{
+                          "secret": {
+                            "type": "SecretText",
+                            "name": "AWS_SECRET_ACCESS_KEY",
+                            "identifier": "AWS_SECRET_ACCESS_KEY",
+                            "orgIdentifier": "<+org.identifier>",
+                            "projectIdentifier": "<+project.identifier>",
+                            "tags": {
+                              "source": "<+pipeline.execution.url>"
+                            },
+                            "spec": {
+                              "type": "SecretTextSpec",
+                              "secretManagerIdentifier": "harnessSecretManager",
+                              "valueType": "Inline",
+                              "value": "<+execution.steps.assume_aws_role.output.outputVariables.AWS_SECRET_ACCESS_KEY>"
+                            }
+                          }
+                        }'
+
+                      curl --fail -X POST \
+                        'https://app.harness.io/gateway/ng/api/v2/secrets?accountIdentifier=<+account.identifier>&orgIdentifier=<+org.identifier>&projectIdentifier=<+project.identifier>&privateSecret=false' \
+                        -H 'Content-Type: application/json' \
+                        -H 'x-api-key: <+secrets.getValue("account.harness_api_token")>' \
+                        -d '{
+                          "secret": {
+                            "type": "SecretText",
+                            "name": "AWS_SESSION_TOKEN",
+                            "identifier": "AWS_SESSION_TOKEN",
+                            "orgIdentifier": "<+org.identifier>",
+                            "projectIdentifier": "<+project.identifier>",
+                            "tags": {
+                              "source": "<+pipeline.execution.url>"
+                            },
+                            "spec": {
+                              "type": "SecretTextSpec",
+                              "secretManagerIdentifier": "harnessSecretManager",
+                              "valueType": "Inline",
+                              "value": "<+execution.steps.assume_aws_role.output.outputVariables.AWS_SESSION_TOKEN>"
+                            }
+                          }
+                        }' || curl --fail -X PUT \
+                        'https://app.harness.io/gateway/ng/api/v2/secrets/AWS_SESSION_TOKEN?accountIdentifier=<+account.identifier>&orgIdentifier=<+org.identifier>&projectIdentifier=<+project.identifier>&privateSecret=false' \
+                        -H 'Content-Type: application/json' \
+                        -H 'x-api-key: <+secrets.getValue("account.harness_api_token")>' \
+                        -d '{
+                          "secret": {
+                            "type": "SecretText",
+                            "name": "AWS_SESSION_TOKEN",
+                            "identifier": "AWS_SESSION_TOKEN",
+                            "orgIdentifier": "<+org.identifier>",
+                            "projectIdentifier": "<+project.identifier>",
+                            "tags": {
+                              "source": "<+pipeline.execution.url>"
+                            },
+                            "spec": {
+                              "type": "SecretTextSpec",
+                              "secretManagerIdentifier": "harnessSecretManager",
+                              "valueType": "Inline",
+                              "value": "<+execution.steps.assume_aws_role.output.outputVariables.AWS_SESSION_TOKEN>"
+                            }
+                          }
+                        }'
+                environmentVariables: []
+                outputVariables: []
+              timeout: 10m
+    failureStrategies:
+      - onFailure:
+          errors: []
+          action:
+            type: Ignore
+  identifier: generate_and_save_aws_keys
+  description: |-
+    Generate AWS access keys (1hr TTL) using a delegate with an instance profile.
+
+    Then upload those access keys to the harness secrets manager for use in other pipeline/connectors.
+  tags: {}
+  versionLabel: "2"
