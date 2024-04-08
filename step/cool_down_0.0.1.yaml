@@ -1,0 +1,25 @@
+template:
+  name: cool down
+  identifier: cool_down
+  versionLabel: 0.0.1
+  type: Step
+  tags: {}
+  spec:
+    type: Http
+    spec:
+      url: https://app.harness.io/gateway/lw/api/accounts/<+account.identifier>/autostopping/rules/<+spec.inputVariables.rule_id>/cooldown?routingId=<+account.identifier>&accountIdentifier=<+account.identifier>
+      method: POST
+      headers:
+        - key: x-api-key
+          value: <+input>
+      inputVariables:
+        - name: rule_id
+          value: <+input>
+          type: String
+        - name: propagate
+          value: <+input>.default("true")
+          type: String
+      outputVariables: []
+      requestBody: "{\"propagate\":<+spec.inputVariables.propagate>,\"force\":true,\"source\":\"<+org.identifier>.<+project.identifier>.<+pipeline.identifier>.<+pipeline.executionId>\"}"
+      assertion: <+httpResponseCode> == 200
+    timeout: 10s
