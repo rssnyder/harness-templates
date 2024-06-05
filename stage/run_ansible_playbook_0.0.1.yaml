@@ -38,16 +38,22 @@ template:
                         echo <+secrets.getValue("id_rsa")> | base64 -d > id_rsa
                         chmod 600 id_rsa
 
+                        echo '<+secrets.getValue("vault_password")>' > .vault_password
+
                         cat > hosts << 'EOF'
-                        <+execution.steps.execute.variables.host> ansible_user=<+execution.steps.execute.variables.user> ansible_ssh_private_key_file=id_rsa
+                        <+execution.steps.execute.variables.host> ansible_user=<+execution.steps.execute.variables.user>
                         EOF
 
-                        pwd
-                        ls -l
+                        ansible-galaxy install -r requirements.yml
 
-                        ansible-playbook -i hosts --extra-vars "appID=<+execution.steps.execute.variables.appID> region=<+execution.steps.execute.variables.region> <+execution.steps.execute.variables.extra_vars>" playbooks/<+execution.steps.execute.variables.playbook>
+                        ansible-playbook --vault-password=.vault_password -i secrets.yml --private-key=id_rsa -i <+<+execution.steps.execute.variables.host> == "" ? <+execution.steps.execute.variables.host_file> : "hosts"> --extra-vars "appID=<+execution.steps.execute.variables.appID> region=<+execution.steps.execute.variables.region> <+execution.steps.execute.variables.extra_vars>" playbooks/<+execution.steps.execute.variables.playbook>
               variables:
                 - name: host
+                  type: String
+                  value: <+input>
+                  description: ""
+                  required: false
+                - name: host_file
                   type: String
                   value: <+input>
                   description: ""
