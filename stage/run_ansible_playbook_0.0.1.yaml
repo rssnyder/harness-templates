@@ -30,7 +30,7 @@ template:
                     identifier: execute
                     spec:
                       connectorRef: account.dockerhub
-                      image: pad92/ansible-alpine:latest
+                      image: pad92/ansible-alpine:9.1.0
                       shell: Sh
                       command: |-
                         cd <+execution.steps.execute.steps.clone.spec.repoName>
