@@ -1,0 +1,86 @@
+template:
+  name: run ansible playbook
+  identifier: run_ansible_playbook
+  versionLabel: 0.0.1
+  type: Stage
+  tags: {}
+  spec:
+    type: Custom
+    spec:
+      execution:
+        steps:
+          - stepGroup:
+              name: execute
+              identifier: execute
+              steps:
+                - step:
+                    type: GitClone
+                    name: clone
+                    identifier: clone
+                    spec:
+                      connectorRef: account.rssnyder
+                      repoName: <+input>
+                      build:
+                        type: branch
+                        spec:
+                          branch: <+input>
+                - step:
+                    type: Run
+                    name: execute
+                    identifier: execute
+                    spec:
+                      connectorRef: account.dockerhub
+                      image: pad92/ansible-alpine:latest
+                      shell: Sh
+                      command: |-
+                        cd <+execution.steps.execute.steps.clone.spec.repoName>
+
+                        echo <+secrets.getValue("id_rsa")> | base64 -d > id_rsa
+                        chmod 600 id_rsa
+
+                        cat > hosts << 'EOF'
+                        <+execution.steps.execute.variables.host> ansible_user=<+execution.steps.execute.variables.user> ansible_ssh_private_key_file=id_rsa
+                        EOF
+
+                        pwd
+                        ls -l
+
+                        ansible-playbook -i hosts --extra-vars "appID=<+execution.steps.execute.variables.appID> region=<+execution.steps.execute.variables.region> <+execution.steps.execute.variables.extra_vars>" playbooks/<+execution.steps.execute.variables.playbook>
+              variables:
+                - name: host
+                  type: String
+                  value: <+input>
+                  description: ""
+                  required: false
+                - name: user
+                  type: String
+                  value: <+input>
+                  description: ""
+                  required: false
+                - name: playbook
+                  type: String
+                  value: <+input>
+                  description: ""
+                  required: false
+                - name: appID
+                  type: String
+                  value: <+input>.allowedValues(app1,app2,app3)
+                  description: ""
+                  required: false
+                - name: region
+                  type: String
+                  value: <+input>.allowedValues(centralus,westus)
+                  description: ""
+                  required: false
+                - name: extra_vars
+                  type: String
+                  value: <+input>
+                  description: ""
+                  required: false
+              stepGroupInfra:
+                type: KubernetesDirect
+                spec:
+                  connectorRef: account._lab
+                  namespace: iacm
+        rollbackSteps: []
+      serviceDependencies: []
