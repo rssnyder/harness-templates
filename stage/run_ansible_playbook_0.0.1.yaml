@@ -18,7 +18,7 @@ template:
                     name: clone
                     identifier: clone
                     spec:
-                      connectorRef: account.rssnyder
+                      connectorRef: <+input>
                       repoName: <+input>
                       build:
                         type: branch
