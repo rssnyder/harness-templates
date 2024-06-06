@@ -44,7 +44,12 @@ template:
                         <+execution.steps.execute.variables.host> ansible_user=<+execution.steps.execute.variables.user>
                         EOF
 
-                        ansible-galaxy install -r requirements.yml
+                        if [ -e requirements.yml ]
+                        then
+                            ansible-galaxy install -r requirements.yml
+                        else
+                            echo "no requirements.yml found"
+                        fi
 
                         ansible-playbook --vault-password=.vault_password -i secrets.yml --private-key=id_rsa -i <+<+execution.steps.execute.variables.host> == "" ? <+execution.steps.execute.variables.host_file> : "hosts"> --extra-vars "appID=<+execution.steps.execute.variables.appID> region=<+execution.steps.execute.variables.region> <+execution.steps.execute.variables.extra_vars>" playbooks/<+execution.steps.execute.variables.playbook>
               variables:
