@@ -1,0 +1,68 @@
+template:
+  name: iac all in one
+  type: Stage
+  spec:
+    type: IACM
+    spec:
+      platform:
+        os: Linux
+        arch: Amd64
+      runtime:
+        type: Cloud
+        spec: {}
+      workspace: featureflagrelayproxyecs
+      execution:
+        steps:
+          - step:
+              type: IACMTerraformPlugin
+              name: init
+              identifier: init
+              spec:
+                command: init
+              timeout: 10m
+          - step:
+              type: IACMTerraformPlugin
+              name: validate
+              identifier: validate
+              spec:
+                command: validate
+              timeout: 10m
+          - step:
+              type: IACMTerraformPlugin
+              name: drift
+              identifier: drift
+              spec:
+                command: detect-drift
+              timeout: 10m
+              when:
+                stageStatus: Success
+                condition: <+trigger.type> == "Scheduled"
+          - step:
+              type: IACMTerraformPlugin
+              name: plan
+              identifier: plan
+              spec:
+                command: plan
+              timeout: 10m
+          - step:
+              type: IACMApproval
+              name: approve
+              identifier: approve
+              spec:
+                autoApprove: false
+              timeout: 1h
+              when:
+                stageStatus: Success
+                condition: <+trigger.event> != "PR"
+          - step:
+              type: IACMTerraformPlugin
+              name: apply
+              identifier: apply
+              spec:
+                command: apply
+              timeout: 10m
+              when:
+                stageStatus: Success
+                condition: <+trigger.event> != "PR"
+  identifier: iac_all_in_one
+  versionLabel: 0.0.1
