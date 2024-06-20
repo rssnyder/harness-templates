@@ -7,8 +7,8 @@ pipeline:
   properties:
     ci:
       codebase:
-        connectorRef: account.rssnyder
-        repoName: harness-templates
+        connectorRef: account.global
+        repoName: harness-community/custom-delegate
         build: <+input>
   stages:
     - stage:
@@ -72,14 +72,13 @@ pipeline:
                     repo: rssnyder/delegate
                     tags:
                       - <+pipeline.variables.test_tag>
-                    dockerfile: delegate/Dockerfile
+                    dockerfile: Dockerfile.tools
                     buildArgs:
-                      DELEGATE_TAG: <+steps.get_latest_tag.output.outputVariables.LATEST>
+                      SOURCE_TAG: <+steps.get_latest_tag.output.outputVariables.LATEST>
                     resources:
                       limits:
                         memory: 2G
                         cpu: "2"
-                  failureStrategies: []
           platform:
             os: Linux
             arch: Amd64
