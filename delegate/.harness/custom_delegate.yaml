@@ -224,9 +224,17 @@ pipeline:
                       docker tag rssnyder/delegate:<+pipeline.variables.test_tag> rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.get_latest_tag.output.outputVariables.LATEST>
                       docker push rssnyder/delegate:latest
                       docker push rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.get_latest_tag.output.outputVariables.LATEST>
-
+              - step:
+                  type: Run
+                  name: set latest
+                  identifier: set_latest
+                  spec:
+                    connectorRef: account.dockerhub
+                    image: curlimages/curl
+                    shell: Sh
+                    command: |-
                       curl --location --request PUT 'https://app.harness.io/ng/api/delegate-setup/override-delegate-tag?accountIdentifier=<+account.identifier>&delegateTag=rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.get_latest_tag.output.outputVariables.LATEST>' \
-                      --header 'x-api-key: <+secrets.getValue("account.api")>'
+                        --header 'x-api-key: <+secrets.getValue("account.api")>'
           sharedPaths:
             - /var/run
           platform:
