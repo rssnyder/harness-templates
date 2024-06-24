@@ -19,37 +19,6 @@ pipeline:
           cloneCodebase: true
           execution:
             steps:
-              - parallel:
-                  - step:
-                      type: Background
-                      name: dind
-                      identifier: dind
-                      spec:
-                        connectorRef: account.dockerhub
-                        image: docker:dind
-                        shell: Sh
-                  - step:
-                      type: Run
-                      name: check
-                      identifier: check
-                      spec:
-                        connectorRef: account.dockerhub
-                        image: docker:latest
-                        shell: Sh
-                        command: docker ps
-                      failureStrategies:
-                        - onFailure:
-                            errors:
-                              - AllErrors
-                            action:
-                              type: Retry
-                              spec:
-                                retryCount: 10
-                                retryIntervals:
-                                  - 5s
-                                onRetryFailure:
-                                  action:
-                                    type: MarkAsFailure
               - step:
                   type: Plugin
                   name: latest
