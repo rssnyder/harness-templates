@@ -51,18 +51,14 @@ pipeline:
                                   action:
                                     type: MarkAsFailure
               - step:
-                  type: Run
-                  name: get latest tag
-                  identifier: get_latest_tag
+                  type: Plugin
+                  name: latest
+                  identifier: latest
                   spec:
                     connectorRef: account.dockerhub
-                    image: alpine
-                    shell: Sh
-                    command: |
-                      apk add curl jq
-                      export LATEST=$(curl 'https://app.harness.io/ng/api/delegate-setup/latest-supported-version?accountIdentifier=<+account.identifier>' -H 'x-api-key: <+secrets.getValue("account.harness_api_token")>' | jq '.resource.latestSupportedVersion')
-                    outputVariables:
-                      - name: LATEST
+                    image: rssnyder/drone-plugin-latest-delegate
+                    settings:
+                      HARNESS_PLATFORM_API_KEY: <+secrets.getValue("account.api")>
               - step:
                   type: BuildAndPushDockerRegistry
                   name: test
@@ -74,7 +70,7 @@ pipeline:
                       - <+pipeline.variables.test_tag>
                     dockerfile: Dockerfile.tools
                     buildArgs:
-                      SOURCE_TAG: <+steps.get_latest_tag.output.outputVariables.LATEST>
+                      SOURCE_TAG: <+steps.latest.output.outputVariables.latestSupportedVersion>
                     resources:
                       limits:
                         memory: 2G
@@ -221,9 +217,9 @@ pipeline:
                       docker login -u rssnyder -p '<+secrets.getValue("account.dockerhub")>'
                       docker pull rssnyder/delegate:<+pipeline.variables.test_tag>
                       docker tag rssnyder/delegate:<+pipeline.variables.test_tag> rssnyder/delegate:latest
-                      docker tag rssnyder/delegate:<+pipeline.variables.test_tag> rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.get_latest_tag.output.outputVariables.LATEST>
+                      docker tag rssnyder/delegate:<+pipeline.variables.test_tag> rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.latest.output.outputVariables.latestSupportedVersion>
                       docker push rssnyder/delegate:latest
-                      docker push rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.get_latest_tag.output.outputVariables.LATEST>
+                      docker push rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.latest.output.outputVariables.latestSupportedVersion>
               - step:
                   type: Run
                   name: set latest
