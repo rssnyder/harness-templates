@@ -195,7 +195,7 @@ pipeline:
                   identifier: set_latest
                   spec:
                     connectorRef: account.dockerhub
-                    image: rssnyder/drone-plugin-set-latest-delegate
+                    image: rssnyder/drone-plugin-latest-delegate
                     settings:
                       DELEGATE_TAG: rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.get_latest_tag.output.outputVariables.LATEST>
                       HARNESS_PLATFORM_API_KEY: <+secrets.getValue("account.api")>
