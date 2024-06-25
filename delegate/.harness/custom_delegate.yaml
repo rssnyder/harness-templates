@@ -197,7 +197,7 @@ pipeline:
                     connectorRef: account.dockerhub
                     image: rssnyder/drone-plugin-latest-delegate
                     settings:
-                      DELEGATE_TAG: rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.get_latest_tag.output.outputVariables.LATEST>
+                      DELEGATE_TAG: rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.latest.output.outputVariables.latestSupportedVersion>
                       HARNESS_PLATFORM_API_KEY: <+secrets.getValue("account.api")>
           sharedPaths:
             - /var/run
