@@ -135,81 +135,148 @@ pipeline:
                 - AllErrors
               action:
                 type: StageRollback
-    - stage:
-        name: publish
-        identifier: build
-        type: CI
-        spec:
-          cloneCodebase: true
-          execution:
-            steps:
-              - parallel:
-                  - step:
-                      type: Background
-                      name: dind
-                      identifier: dind
-                      spec:
-                        connectorRef: account.dockerhub
-                        image: docker:dind
-                        shell: Sh
+    - parallel:
+        - stage:
+            name: publish
+            identifier: publish
+            type: CI
+            spec:
+              cloneCodebase: true
+              execution:
+                steps:
+                  - parallel:
+                      - step:
+                          type: Background
+                          name: dind
+                          identifier: dind
+                          spec:
+                            connectorRef: account.dockerhub
+                            image: docker:dind
+                            shell: Sh
+                      - step:
+                          type: Run
+                          name: check
+                          identifier: check
+                          spec:
+                            connectorRef: account.dockerhub
+                            image: docker:latest
+                            shell: Sh
+                            command: docker ps
+                          failureStrategies:
+                            - onFailure:
+                                errors:
+                                  - AllErrors
+                                action:
+                                  type: Retry
+                                  spec:
+                                    retryCount: 10
+                                    retryIntervals:
+                                      - 5s
+                                    onRetryFailure:
+                                      action:
+                                        type: MarkAsFailure
                   - step:
                       type: Run
-                      name: check
-                      identifier: check
+                      name: publish
+                      identifier: publish
                       spec:
                         connectorRef: account.dockerhub
-                        image: docker:latest
+                        image: docker
                         shell: Sh
-                        command: docker ps
-                      failureStrategies:
-                        - onFailure:
-                            errors:
-                              - AllErrors
-                            action:
-                              type: Retry
-                              spec:
-                                retryCount: 10
-                                retryIntervals:
-                                  - 5s
-                                onRetryFailure:
-                                  action:
-                                    type: MarkAsFailure
-              - step:
-                  type: Run
-                  name: publish
-                  identifier: publish
-                  spec:
-                    connectorRef: account.dockerhub
-                    image: docker
-                    shell: Sh
-                    command: |-
-                      docker login -u rssnyder -p '<+secrets.getValue("account.dockerhub")>'
-                      docker pull rssnyder/delegate:<+pipeline.variables.test_tag>
-                      docker tag rssnyder/delegate:<+pipeline.variables.test_tag> rssnyder/delegate:latest
-                      docker tag rssnyder/delegate:<+pipeline.variables.test_tag> rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.latest.output.outputVariables.latestSupportedVersion>
-                      docker push rssnyder/delegate:latest
-                      docker push rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.latest.output.outputVariables.latestSupportedVersion>
-              - step:
-                  type: Plugin
-                  name: set latest
-                  identifier: set_latest
-                  spec:
-                    connectorRef: account.dockerhub
-                    image: rssnyder/drone-plugin-latest-delegate
-                    settings:
-                      DELEGATE_TAG: rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.latest.output.outputVariables.latestSupportedVersion>
-                      HARNESS_PLATFORM_API_KEY: <+secrets.getValue("account.api")>
-          sharedPaths:
-            - /var/run
-          platform:
-            os: Linux
-            arch: Amd64
-          runtime:
-            type: Cloud
-            spec: {}
-        when:
-          pipelineStatus: Success
-          condition: <+codebase.branch> == "main"
+                        command: |-
+                          docker login -u rssnyder -p '<+secrets.getValue("account.dockerhub")>'
+                          docker pull rssnyder/delegate:<+pipeline.variables.test_tag>
+                          docker tag rssnyder/delegate:<+pipeline.variables.test_tag> rssnyder/delegate:latest
+                          docker tag rssnyder/delegate:<+pipeline.variables.test_tag> rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.latest.output.outputVariables.latestSupportedVersion>
+                          docker push rssnyder/delegate:latest
+                          docker push rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.latest.output.outputVariables.latestSupportedVersion>
+                  - step:
+                      type: Plugin
+                      name: set latest
+                      identifier: set_latest
+                      spec:
+                        connectorRef: account.dockerhub
+                        image: rssnyder/drone-plugin-latest-delegate
+                        settings:
+                          DELEGATE_TAG: rssnyder/delegate:<+pipeline.stages.test.spec.execution.steps.latest.output.outputVariables.latestSupportedVersion>
+                          HARNESS_PLATFORM_API_KEY: <+secrets.getValue("account.api")>
+              sharedPaths:
+                - /var/run
+              platform:
+                os: Linux
+                arch: Amd64
+              runtime:
+                type: Cloud
+                spec: {}
+            when:
+              pipelineStatus: Success
+              condition: <+codebase.branch> == "main"
+        - stage:
+            name: publish_arm
+            identifier: publish_arm
+            type: CI
+            spec:
+              cloneCodebase: true
+              execution:
+                steps:
+                  - parallel:
+                      - step:
+                          type: Background
+                          name: dind
+                          identifier: dind
+                          spec:
+                            connectorRef: account.dockerhub
+                            image: docker:dind
+                            shell: Sh
+                      - step:
+                          type: Run
+                          name: check
+                          identifier: check
+                          spec:
+                            connectorRef: account.dockerhub
+                            image: docker:latest
+                            shell: Sh
+                            command: docker ps
+                          failureStrategies:
+                            - onFailure:
+                                errors:
+                                  - AllErrors
+                                action:
+                                  type: Retry
+                                  spec:
+                                    retryCount: 10
+                                    retryIntervals:
+                                      - 5s
+                                    onRetryFailure:
+                                      action:
+                                        type: MarkAsFailure
+                  - step:
+                      type: BuildAndPushDockerRegistry
+                      name: build
+                      identifier: build
+                      spec:
+                        connectorRef: account.dockerhub
+                        repo: rssnyder/delegate
+                        tags:
+                          - <+pipeline.variables.test_tag>
+                        dockerfile: Dockerfile.tools
+                        buildArgs:
+                          SOURCE_TAG: <+steps.latest.output.outputVariables.latestSupportedVersion>
+                        resources:
+                          limits:
+                            memory: 2G
+                            cpu: "2"
+              sharedPaths:
+                - /var/run
+              platform:
+                os: Linux
+                arch: Arm64
+              runtime:
+                type: Cloud
+                spec: {}
+            when:
+              pipelineStatus: Success
+              condition: <+codebase.branch> == "main"
   variables:
     - name: base_image
       type: String
