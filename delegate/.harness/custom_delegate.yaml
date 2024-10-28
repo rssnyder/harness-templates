@@ -258,10 +258,11 @@ pipeline:
                         connectorRef: account.dockerhub
                         repo: rssnyder/delegate
                         tags:
-                          - <+pipeline.variables.test_tag>
+                          - <+pipeline.stages.test.spec.execution.steps.latest.output.outputVariables.latestSupportedVersion>-arm64
+                          - latest
                         dockerfile: Dockerfile.tools
                         buildArgs:
-                          SOURCE_TAG: <+steps.latest.output.outputVariables.latestSupportedVersion>
+                          SOURCE_TAG: <+pipeline.stages.test.spec.execution.steps.latest.output.outputVariables.latestSupportedVersion>
                         resources:
                           limits:
                             memory: 2G
