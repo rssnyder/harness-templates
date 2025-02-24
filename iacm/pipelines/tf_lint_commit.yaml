@@ -1,0 +1,136 @@
+pipeline:
+  name: tf lint commit
+  identifier: tf_lint_commit
+  projectIdentifier: iacm
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        type: IACM
+        spec:
+          workspace: <+input>
+          execution:
+            steps:
+              - step:
+                  type: IACMOpenTofuPlugin
+                  name: init
+                  identifier: init
+                  spec:
+                    command: init
+                  timeout: 10m
+              - step:
+                  type: Run
+                  name: tflint
+                  identifier: tflint
+                  spec:
+                    connectorRef: account.dockerhub
+                    image: ghcr.io/terraform-linters/tflint
+                    shell: Sh
+                    command: |-
+                      tflint --chdir=<+workspace.folderPath> --init
+                      tflint --chdir=<+workspace.folderPath> --fix
+                    envVariables:
+                      TFLINT_LOG: debug
+                      HOME: /harness
+              - step:
+                  type: Run
+                  name: git
+                  identifier: git
+                  spec:
+                    connectorRef: account.dockerhub
+                    image: harness/drone-git:1.6.4-rootless
+                    shell: Sh
+                    command: |-
+                      git config --global user.email "iacm@harness.io"
+                      git config --global user.name "Harness IaCM"
+
+                      git status
+
+                      git add .
+                      git commit -m 'fix from tflint'
+                      git push
+                  when:
+                    stageStatus: Success
+                contextType: Pipeline
+              - step:
+                  type: IACMOpenTofuPlugin
+                  name: plan
+                  identifier: plan
+                  spec:
+                    command: plan
+                  timeout: 10m
+              - step:
+                  type: IACMApproval
+                  name: approve
+                  identifier: approve
+                  spec:
+                    autoApprove: false
+                  timeout: 1h
+                  when:
+                    stageStatus: Success
+                    condition: |
+                      <+trigger.event> != "PR"
+              - step:
+                  type: IACMOpenTofuPlugin
+                  name: apply
+                  identifier: apply
+                  spec:
+                    command: apply
+                    target: []
+                    replace: []
+                  timeout: 10m
+                  when:
+                    stageStatus: Success
+                    condition: <+trigger.event> != "PR"
+              - stepGroup:
+                  name: outputs
+                  identifier: outputs
+                  steps:
+                    - step:
+                        type: Run
+                        name: tf output json container
+                        identifier: tf_output_json_container
+                        spec:
+                          connectorRef: account.ghcr
+                          image: opentofu/opentofu:<+workspace.provisionerVersion>
+                          shell: Sh
+                          command: |-
+                            tofu -chdir=/harness/<+workspace.folderPath> output -json > tf_outputs.json
+
+                            cat tf_outputs.json
+                        when:
+                          stageStatus: Success
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: account._micro
+              namespace: default
+              volumes:
+                - mountPath: /home/drone
+                  type: EmptyDir
+                  spec:
+                    medium: ""
+              serviceAccountName: ""
+              annotations: {}
+              labels: {}
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              containerSecurityContext:
+                privileged: false
+                allowPrivilegeEscalation: false
+                runAsNonRoot: true
+                runAsUser: "1000"
+                capabilities:
+                  drop: []
+                  add: []
+              os: Linux
+              hostNames: []
+        variables:
+          - name: PLUGIN_ENABLE_PRINT_ENV
+            type: String
+            description: ""
+            required: false
+            value: "true"
+        name: check
+        identifier: check
+        tags: {}
