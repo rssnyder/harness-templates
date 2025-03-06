@@ -50,7 +50,7 @@ pipeline:
                       git commit -m 'fix from tflint'
                       git push
                   when:
-                    stageStatus: Success
+                    stageStatus: Failure
                 contextType: Pipeline
               - step:
                   type: IACMOpenTofuPlugin
