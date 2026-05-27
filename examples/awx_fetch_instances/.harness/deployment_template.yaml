@@ -1,0 +1,344 @@
+template:
+  name: AWX
+  identifier: AWX
+  versionLabel: "1.0"
+  type: CustomDeployment
+  tags: {}
+  spec:
+    infrastructure:
+      variables:
+        - name: inventory
+          type: String
+          value: <+input>
+          description: ""
+          required: true
+      fetchInstancesScript:
+        store:
+          type: Inline
+          spec:
+            content: |
+              #!/usr/bin/env bash
+
+              set -euo pipefail
+
+              # AWX API Inventory Fetcher
+              # Fetches inventory and resolves all hosts from AWX/Ansible Tower
+
+              # Configuration (can be overridden by environment variables)
+              AWX_HOST="${AWX_HOST:-}"
+              AWX_TOKEN="${AWX_TOKEN:-}"
+              AWX_USERNAME="${AWX_USERNAME:-}"
+              AWX_PASSWORD="${AWX_PASSWORD:-}"
+              AWX_VERIFY_SSL="${AWX_VERIFY_SSL:-true}"
+              INVENTORY_ID="${INVENTORY_ID:-}"
+
+              # Colors for output
+              RED='\033[0;31m'
+              GREEN='\033[0;32m'
+              YELLOW='\033[1;33m'
+              BLUE='\033[0;34m'
+              NC='\033[0m' # No Color
+
+              # Usage function
+              usage() {
+                  cat << EOF
+              Usage: $0 [OPTIONS]
+
+              Fetch inventory and resolve hosts from AWX/Ansible Tower API
+
+              Required Environment Variables (or pass as arguments):
+                  AWX_HOST        - AWX server URL (e.g., https://awx.example.com)
+                  AWX_TOKEN       - AWX API token (preferred)
+                  OR
+                  AWX_USERNAME    - AWX username
+                  AWX_PASSWORD    - AWX password
+
+              Options:
+                  -h, --host HOST         AWX server URL
+                  -t, --token TOKEN       AWX API token
+                  -u, --username USER     AWX username (if not using token)
+                  -p, --password PASS     AWX password (if not using token)
+                  -i, --inventory ID      Inventory ID to fetch
+                  -k, --insecure          Skip SSL verification
+                  -o, --output FILE       Output results to file (JSON format)
+                  -v, --verbose           Verbose output
+                  --help                  Show this help message
+
+              Examples:
+                  # Using token authentication
+                  $0 -h https://awx.example.com -t mytoken123 -i 5
+
+                  # Using username/password
+                  $0 -h https://awx.example.com -u admin -p password -i 5
+
+                  # Using environment variables
+                  export AWX_HOST=https://awx.example.com
+                  export AWX_TOKEN=mytoken123
+                  $0 -i 5
+
+              EOF
+                  exit 1
+              }
+
+              # Logging functions
+              log_info() {
+                  echo -e "${BLUE}[INFO]${NC} $*" >&2
+              }
+
+              log_success() {
+                  echo -e "${GREEN}[SUCCESS]${NC} $*" >&2
+              }
+
+              log_warn() {
+                  echo -e "${YELLOW}[WARN]${NC} $*" >&2
+              }
+
+              log_error() {
+                  echo -e "${RED}[ERROR]${NC} $*" >&2
+              }
+
+              # Check dependencies
+              check_dependencies() {
+                  local missing_deps=()
+
+                  if ! command -v curl &> /dev/null; then
+                      missing_deps+=("curl")
+                  fi
+
+                  if ! command -v jq &> /dev/null; then
+                      missing_deps+=("jq")
+                  fi
+
+                  if [ ${#missing_deps[@]} -ne 0 ]; then
+                      log_error "Missing required dependencies: ${missing_deps[*]}"
+                      log_error "Please install them and try again"
+                      exit 1
+                  fi
+              }
+
+              # Validate configuration
+              validate_config() {
+                  if [ -z "$AWX_HOST" ]; then
+                      log_error "AWX_HOST is required"
+                      usage
+                  fi
+
+                  if [ -z "$AWX_TOKEN" ] && { [ -z "$AWX_USERNAME" ] || [ -z "$AWX_PASSWORD" ]; }; then
+                      log_error "Either AWX_TOKEN or both AWX_USERNAME and AWX_PASSWORD are required"
+                      usage
+                  fi
+
+                  if [ -z "$INVENTORY_ID" ]; then
+                      log_error "INVENTORY_ID is required"
+                      usage
+                  fi
+              }
+
+              # Build curl auth arguments
+              build_auth_args() {
+                  local auth_args=""
+
+                  if [ -n "$AWX_TOKEN" ]; then
+                      auth_args="-H 'Authorization: Bearer $AWX_TOKEN'"
+                  else
+                      auth_args="-u '$AWX_USERNAME:$AWX_PASSWORD'"
+                  fi
+
+                  if [ "$AWX_VERIFY_SSL" = "false" ]; then
+                      auth_args="$auth_args -k"
+                  fi
+
+                  echo "$auth_args"
+              }
+
+              # Make API request with pagination support
+              api_request() {
+                  local endpoint="$1"
+                  local url="${AWX_HOST}/api/v2/${endpoint}"
+                  local auth_args
+                  auth_args=$(build_auth_args)
+                  local all_results="[]"
+                  local next_url="$url"
+
+                  [ "${VERBOSE:-false}" = "true" ] && log_info "Fetching: $endpoint"
+
+                  while [ -n "$next_url" ] && [ "$next_url" != "null" ]; do
+                      local response
+                      response=$(eval curl -sS $auth_args -H "'Content-Type: application/json'" "'$next_url'")
+
+                      if [ $? -ne 0 ]; then
+                          log_error "API request failed: $next_url"
+                          return 1
+                      fi
+
+                      # Check for API errors
+                      if echo "$response" | jq -e '.detail' &> /dev/null; then
+                          local error_detail
+                          error_detail=$(echo "$response" | jq -r '.detail')
+                          log_error "API error: $error_detail"
+                          return 1
+                      fi
+
+                      # Extract results from this page
+                      local page_results
+                      page_results=$(echo "$response" | jq -c '.results // [.]')
+
+                      # Append to all results
+                      all_results=$(jq -s '.[0] + .[1]' <(echo "$all_results") <(echo "$page_results"))
+
+                      # Get next page URL
+                      next_url=$(echo "$response" | jq -r '.next // empty')
+
+                      [ "${VERBOSE:-false}" = "true" ] && [ -n "$next_url" ] && [ "$next_url" != "null" ] && log_info "Fetching next page..."
+                  done
+
+                  echo "$all_results"
+              }
+
+              # Fetch inventory details
+              fetch_inventory() {
+                  local inventory_id="$1"
+
+                  log_info "Fetching inventory $inventory_id details..."
+
+                  local inventory
+                  inventory=$(api_request "inventories/${inventory_id}/")
+
+                  if [ $? -ne 0 ]; then
+                      log_error "Failed to fetch inventory"
+                      return 1
+                  fi
+
+                  local name
+                  name=$(echo "$inventory" | jq -r '.[0].name // .name // "Unknown"')
+
+                  log_success "Inventory: $name (ID: $inventory_id)"
+
+                  echo "$inventory"
+              }
+
+              # Fetch all hosts in inventory
+              fetch_hosts() {
+                  local inventory_id="$1"
+
+                  log_info "Fetching hosts for inventory $inventory_id..."
+
+                  local hosts
+                  hosts=$(api_request "inventories/${inventory_id}/hosts/")
+
+                  if [ $? -ne 0 ]; then
+                      log_error "Failed to fetch hosts"
+                      return 1
+                  fi
+
+                  local host_count
+                  host_count=$(echo "$hosts" | jq 'length')
+
+                  log_success "Found $host_count host(s)"
+
+                  echo "$hosts"
+              }
+
+              # Fetch groups in inventory
+              fetch_groups() {
+                  local inventory_id="$1"
+
+                  log_info "Fetching groups for inventory $inventory_id..."
+
+                  local groups
+                  groups=$(api_request "inventories/${inventory_id}/groups/")
+
+                  if [ $? -ne 0 ]; then
+                      log_error "Failed to fetch groups"
+                      return 1
+                  fi
+
+                  local group_count
+                  group_count=$(echo "$groups" | jq 'length')
+
+                  log_success "Found $group_count group(s)"
+
+                  echo "$groups"
+              }
+
+              # Build complete inventory structure
+              build_inventory_structure() {
+                  local inventory_id="$1"
+
+                  local inventory hosts groups
+
+                  inventory=$(fetch_inventory "$inventory_id")
+                  [ $? -ne 0 ] && return 1
+
+                  hosts=$(fetch_hosts "$inventory_id")
+                  [ $? -ne 0 ] && return 1
+
+                  groups=$(fetch_groups "$inventory_id")
+                  [ $? -ne 0 ] && return 1
+
+                  # Combine into single JSON structure
+                  local result
+                  result=$(jq -n \
+                      --argjson inventory "$inventory" \
+                      --argjson hosts "$hosts" \
+                      --argjson groups "$groups" \
+                      '{
+                          inventory: ($inventory | if type == "array" then .[0] else . end),
+                          hosts: $hosts,
+                          groups: $groups,
+                          summary: {
+                              total_hosts: ($hosts | length),
+                              total_groups: ($groups | length),
+                              host_names: ($hosts | map(.name) | sort)
+                          }
+                      }')
+
+                  echo "$result"
+              }
+
+              # Main function
+              main() {
+                  check_dependencies
+                  validate_config
+
+                  log_info "Connecting to AWX: $AWX_HOST"
+
+                  local result
+                  result=$(build_inventory_structure "$INVENTORY_ID")
+
+                  if [ $? -ne 0 ]; then
+                      log_error "Failed to build inventory structure"
+                      exit 1
+                  fi
+
+                  # Output results
+                  if [ -n "${INSTANCE_OUTPUT_PATH:-}" ]; then
+                      echo "$result" | jq '.' > "$INSTANCE_OUTPUT_PATH"
+                      log_success "Results written to: $INSTANCE_OUTPUT_PATH"
+                  else
+                      echo "$result" | jq '.'
+                  fi
+
+                  # Print summary
+                  echo >&2
+                  log_success "Inventory fetch complete!"
+                  echo "$result" | jq -r '"Total Hosts: \(.summary.total_hosts)\nTotal Groups: \(.summary.total_groups)"' >&2
+              }
+
+              # Run main function
+              export AWX_HOST=http://192.168.252.5
+              export AWX_USERNAME=admin
+              export AWX_PASSWORD=<+secrets.getValue("awx_pass")>
+              export INVENTORY_ID=<+infra.variables.inventory>
+
+              main
+      instanceAttributes:
+        - name: instancename
+          jsonPath: name
+          description: name
+        - name: instanceid
+          jsonPath: id
+          description: id
+      instancesListPath: hosts
+    execution:
+      stepTemplateRefs: []

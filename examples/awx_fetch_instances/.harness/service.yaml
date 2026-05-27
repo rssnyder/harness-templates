@@ -1,0 +1,9 @@
+service:
+  name: awx example
+  identifier: awx_example
+  serviceDefinition:
+    spec:
+      customDeploymentRef:
+        templateRef: account.AWX
+        versionLabel: "1.0"
+    type: CustomDeployment

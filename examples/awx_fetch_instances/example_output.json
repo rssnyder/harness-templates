@@ -1,0 +1,446 @@
+{
+  "inventory": {
+    "id": 13,
+    "type": "inventory",
+    "url": "/api/v2/inventories/13/",
+    "related": {
+      "named_url": "/api/v2/inventories/Test Inventory - Small++Default/",
+      "created_by": "/api/v2/users/1/",
+      "modified_by": "/api/v2/users/1/",
+      "hosts": "/api/v2/inventories/13/hosts/",
+      "variable_data": "/api/v2/inventories/13/variable_data/",
+      "script": "/api/v2/inventories/13/script/",
+      "activity_stream": "/api/v2/inventories/13/activity_stream/",
+      "job_templates": "/api/v2/inventories/13/job_templates/",
+      "ad_hoc_commands": "/api/v2/inventories/13/ad_hoc_commands/",
+      "access_list": "/api/v2/inventories/13/access_list/",
+      "object_roles": "/api/v2/inventories/13/object_roles/",
+      "instance_groups": "/api/v2/inventories/13/instance_groups/",
+      "copy": "/api/v2/inventories/13/copy/",
+      "labels": "/api/v2/inventories/13/labels/",
+      "groups": "/api/v2/inventories/13/groups/",
+      "root_groups": "/api/v2/inventories/13/root_groups/",
+      "update_inventory_sources": "/api/v2/inventories/13/update_inventory_sources/",
+      "inventory_sources": "/api/v2/inventories/13/inventory_sources/",
+      "tree": "/api/v2/inventories/13/tree/",
+      "organization": "/api/v2/organizations/1/"
+    },
+    "summary_fields": {
+      "organization": {
+        "id": 1,
+        "name": "Default",
+        "description": ""
+      },
+      "created_by": {
+        "id": 1,
+        "username": "admin",
+        "first_name": "",
+        "last_name": ""
+      },
+      "modified_by": {
+        "id": 1,
+        "username": "admin",
+        "first_name": "",
+        "last_name": ""
+      },
+      "object_roles": {
+        "admin_role": {
+          "description": "Can manage all aspects of the inventory",
+          "name": "Admin",
+          "id": 95
+        },
+        "update_role": {
+          "description": "May update the inventory",
+          "name": "Update",
+          "id": 96
+        },
+        "adhoc_role": {
+          "description": "May run ad hoc commands on the inventory",
+          "name": "Ad Hoc",
+          "id": 97
+        },
+        "use_role": {
+          "description": "Can use the inventory in a job template",
+          "name": "Use",
+          "id": 98
+        },
+        "read_role": {
+          "description": "May view settings for the inventory",
+          "name": "Read",
+          "id": 99
+        }
+      },
+      "user_capabilities": {
+        "edit": true,
+        "delete": true,
+        "copy": true,
+        "adhoc": true
+      },
+      "labels": {
+        "count": 0,
+        "results": []
+      }
+    },
+    "created": "2026-05-27T20:40:16.351657Z",
+    "modified": "2026-05-27T20:40:16.351678Z",
+    "name": "Test Inventory - Small",
+    "description": "Small test inventory",
+    "organization": 1,
+    "kind": "",
+    "host_filter": null,
+    "variables": "",
+    "has_active_failures": false,
+    "total_hosts": 3,
+    "hosts_with_active_failures": 0,
+    "total_groups": 2,
+    "has_inventory_sources": false,
+    "total_inventory_sources": 0,
+    "inventory_sources_with_failures": 0,
+    "pending_deletion": false,
+    "prevent_instance_group_fallback": false
+  },
+  "hosts": [
+    {
+      "id": 56,
+      "type": "host",
+      "url": "/api/v2/hosts/56/",
+      "related": {
+        "created_by": "/api/v2/users/1/",
+        "modified_by": "/api/v2/users/1/",
+        "variable_data": "/api/v2/hosts/56/variable_data/",
+        "groups": "/api/v2/hosts/56/groups/",
+        "all_groups": "/api/v2/hosts/56/all_groups/",
+        "job_events": "/api/v2/hosts/56/job_events/",
+        "job_host_summaries": "/api/v2/hosts/56/job_host_summaries/",
+        "activity_stream": "/api/v2/hosts/56/activity_stream/",
+        "inventory_sources": "/api/v2/hosts/56/inventory_sources/",
+        "smart_inventories": "/api/v2/hosts/56/smart_inventories/",
+        "ad_hoc_commands": "/api/v2/hosts/56/ad_hoc_commands/",
+        "ad_hoc_command_events": "/api/v2/hosts/56/ad_hoc_command_events/",
+        "ansible_facts": "/api/v2/hosts/56/ansible_facts/",
+        "inventory": "/api/v2/inventories/13/"
+      },
+      "summary_fields": {
+        "inventory": {
+          "id": 13,
+          "name": "Test Inventory - Small",
+          "description": "Small test inventory",
+          "has_active_failures": false,
+          "total_hosts": 3,
+          "hosts_with_active_failures": 0,
+          "total_groups": 2,
+          "has_inventory_sources": false,
+          "total_inventory_sources": 0,
+          "inventory_sources_with_failures": 0,
+          "organization_id": 1,
+          "kind": ""
+        },
+        "created_by": {
+          "id": 1,
+          "username": "admin",
+          "first_name": "",
+          "last_name": ""
+        },
+        "modified_by": {
+          "id": 1,
+          "username": "admin",
+          "first_name": "",
+          "last_name": ""
+        },
+        "user_capabilities": {
+          "edit": true,
+          "delete": true
+        },
+        "groups": {
+          "count": 0,
+          "results": []
+        },
+        "recent_jobs": []
+      },
+      "created": "2026-05-27T20:40:23.232995Z",
+      "modified": "2026-05-27T20:40:23.233015Z",
+      "name": "db-01.example.com",
+      "description": "Database server 1",
+      "inventory": 13,
+      "enabled": true,
+      "instance_id": "",
+      "variables": "{\"ansible_host\": \"192.168.1.20\", \"db_type\": \"postgresql\"}",
+      "has_active_failures": false,
+      "has_inventory_sources": false,
+      "last_job": null,
+      "last_job_host_summary": null,
+      "ansible_facts_modified": null
+    },
+    {
+      "id": 54,
+      "type": "host",
+      "url": "/api/v2/hosts/54/",
+      "related": {
+        "created_by": "/api/v2/users/1/",
+        "modified_by": "/api/v2/users/1/",
+        "variable_data": "/api/v2/hosts/54/variable_data/",
+        "groups": "/api/v2/hosts/54/groups/",
+        "all_groups": "/api/v2/hosts/54/all_groups/",
+        "job_events": "/api/v2/hosts/54/job_events/",
+        "job_host_summaries": "/api/v2/hosts/54/job_host_summaries/",
+        "activity_stream": "/api/v2/hosts/54/activity_stream/",
+        "inventory_sources": "/api/v2/hosts/54/inventory_sources/",
+        "smart_inventories": "/api/v2/hosts/54/smart_inventories/",
+        "ad_hoc_commands": "/api/v2/hosts/54/ad_hoc_commands/",
+        "ad_hoc_command_events": "/api/v2/hosts/54/ad_hoc_command_events/",
+        "ansible_facts": "/api/v2/hosts/54/ansible_facts/",
+        "inventory": "/api/v2/inventories/13/"
+      },
+      "summary_fields": {
+        "inventory": {
+          "id": 13,
+          "name": "Test Inventory - Small",
+          "description": "Small test inventory",
+          "has_active_failures": false,
+          "total_hosts": 3,
+          "hosts_with_active_failures": 0,
+          "total_groups": 2,
+          "has_inventory_sources": false,
+          "total_inventory_sources": 0,
+          "inventory_sources_with_failures": 0,
+          "organization_id": 1,
+          "kind": ""
+        },
+        "created_by": {
+          "id": 1,
+          "username": "admin",
+          "first_name": "",
+          "last_name": ""
+        },
+        "modified_by": {
+          "id": 1,
+          "username": "admin",
+          "first_name": "",
+          "last_name": ""
+        },
+        "user_capabilities": {
+          "edit": true,
+          "delete": true
+        },
+        "groups": {
+          "count": 0,
+          "results": []
+        },
+        "recent_jobs": []
+      },
+      "created": "2026-05-27T20:40:19.619163Z",
+      "modified": "2026-05-27T20:40:19.619184Z",
+      "name": "web-01.example.com",
+      "description": "Web server 1",
+      "inventory": 13,
+      "enabled": true,
+      "instance_id": "",
+      "variables": "{\"ansible_host\": \"192.168.1.10\", \"environment\": \"production\"}",
+      "has_active_failures": false,
+      "has_inventory_sources": false,
+      "last_job": null,
+      "last_job_host_summary": null,
+      "ansible_facts_modified": null
+    },
+    {
+      "id": 55,
+      "type": "host",
+      "url": "/api/v2/hosts/55/",
+      "related": {
+        "created_by": "/api/v2/users/1/",
+        "modified_by": "/api/v2/users/1/",
+        "variable_data": "/api/v2/hosts/55/variable_data/",
+        "groups": "/api/v2/hosts/55/groups/",
+        "all_groups": "/api/v2/hosts/55/all_groups/",
+        "job_events": "/api/v2/hosts/55/job_events/",
+        "job_host_summaries": "/api/v2/hosts/55/job_host_summaries/",
+        "activity_stream": "/api/v2/hosts/55/activity_stream/",
+        "inventory_sources": "/api/v2/hosts/55/inventory_sources/",
+        "smart_inventories": "/api/v2/hosts/55/smart_inventories/",
+        "ad_hoc_commands": "/api/v2/hosts/55/ad_hoc_commands/",
+        "ad_hoc_command_events": "/api/v2/hosts/55/ad_hoc_command_events/",
+        "ansible_facts": "/api/v2/hosts/55/ansible_facts/",
+        "inventory": "/api/v2/inventories/13/"
+      },
+      "summary_fields": {
+        "inventory": {
+          "id": 13,
+          "name": "Test Inventory - Small",
+          "description": "Small test inventory",
+          "has_active_failures": false,
+          "total_hosts": 3,
+          "hosts_with_active_failures": 0,
+          "total_groups": 2,
+          "has_inventory_sources": false,
+          "total_inventory_sources": 0,
+          "inventory_sources_with_failures": 0,
+          "organization_id": 1,
+          "kind": ""
+        },
+        "created_by": {
+          "id": 1,
+          "username": "admin",
+          "first_name": "",
+          "last_name": ""
+        },
+        "modified_by": {
+          "id": 1,
+          "username": "admin",
+          "first_name": "",
+          "last_name": ""
+        },
+        "user_capabilities": {
+          "edit": true,
+          "delete": true
+        },
+        "groups": {
+          "count": 0,
+          "results": []
+        },
+        "recent_jobs": []
+      },
+      "created": "2026-05-27T20:40:21.053277Z",
+      "modified": "2026-05-27T20:40:21.053298Z",
+      "name": "web-02.example.com",
+      "description": "Web server 2",
+      "inventory": 13,
+      "enabled": true,
+      "instance_id": "",
+      "variables": "{\"ansible_host\": \"192.168.1.11\", \"environment\": \"production\"}",
+      "has_active_failures": false,
+      "has_inventory_sources": false,
+      "last_job": null,
+      "last_job_host_summary": null,
+      "ansible_facts_modified": null
+    }
+  ],
+  "groups": [
+    {
+      "id": 34,
+      "type": "group",
+      "url": "/api/v2/groups/34/",
+      "related": {
+        "created_by": "/api/v2/users/1/",
+        "modified_by": "/api/v2/users/1/",
+        "variable_data": "/api/v2/groups/34/variable_data/",
+        "hosts": "/api/v2/groups/34/hosts/",
+        "potential_children": "/api/v2/groups/34/potential_children/",
+        "children": "/api/v2/groups/34/children/",
+        "all_hosts": "/api/v2/groups/34/all_hosts/",
+        "job_events": "/api/v2/groups/34/job_events/",
+        "job_host_summaries": "/api/v2/groups/34/job_host_summaries/",
+        "activity_stream": "/api/v2/groups/34/activity_stream/",
+        "inventory_sources": "/api/v2/groups/34/inventory_sources/",
+        "ad_hoc_commands": "/api/v2/groups/34/ad_hoc_commands/",
+        "inventory": "/api/v2/inventories/13/"
+      },
+      "summary_fields": {
+        "inventory": {
+          "id": 13,
+          "name": "Test Inventory - Small",
+          "description": "Small test inventory",
+          "has_active_failures": false,
+          "total_hosts": 3,
+          "hosts_with_active_failures": 0,
+          "total_groups": 2,
+          "has_inventory_sources": false,
+          "total_inventory_sources": 0,
+          "inventory_sources_with_failures": 0,
+          "organization_id": 1,
+          "kind": ""
+        },
+        "created_by": {
+          "id": 1,
+          "username": "admin",
+          "first_name": "",
+          "last_name": ""
+        },
+        "modified_by": {
+          "id": 1,
+          "username": "admin",
+          "first_name": "",
+          "last_name": ""
+        },
+        "user_capabilities": {
+          "edit": true,
+          "delete": true,
+          "copy": true
+        }
+      },
+      "created": "2026-05-27T20:40:18.675040Z",
+      "modified": "2026-05-27T20:40:18.675059Z",
+      "name": "databases",
+      "description": "Database servers",
+      "inventory": 13,
+      "variables": ""
+    },
+    {
+      "id": 33,
+      "type": "group",
+      "url": "/api/v2/groups/33/",
+      "related": {
+        "created_by": "/api/v2/users/1/",
+        "modified_by": "/api/v2/users/1/",
+        "variable_data": "/api/v2/groups/33/variable_data/",
+        "hosts": "/api/v2/groups/33/hosts/",
+        "potential_children": "/api/v2/groups/33/potential_children/",
+        "children": "/api/v2/groups/33/children/",
+        "all_hosts": "/api/v2/groups/33/all_hosts/",
+        "job_events": "/api/v2/groups/33/job_events/",
+        "job_host_summaries": "/api/v2/groups/33/job_host_summaries/",
+        "activity_stream": "/api/v2/groups/33/activity_stream/",
+        "inventory_sources": "/api/v2/groups/33/inventory_sources/",
+        "ad_hoc_commands": "/api/v2/groups/33/ad_hoc_commands/",
+        "inventory": "/api/v2/inventories/13/"
+      },
+      "summary_fields": {
+        "inventory": {
+          "id": 13,
+          "name": "Test Inventory - Small",
+          "description": "Small test inventory",
+          "has_active_failures": false,
+          "total_hosts": 3,
+          "hosts_with_active_failures": 0,
+          "total_groups": 2,
+          "has_inventory_sources": false,
+          "total_inventory_sources": 0,
+          "inventory_sources_with_failures": 0,
+          "organization_id": 1,
+          "kind": ""
+        },
+        "created_by": {
+          "id": 1,
+          "username": "admin",
+          "first_name": "",
+          "last_name": ""
+        },
+        "modified_by": {
+          "id": 1,
+          "username": "admin",
+          "first_name": "",
+          "last_name": ""
+        },
+        "user_capabilities": {
+          "edit": true,
+          "delete": true,
+          "copy": true
+        }
+      },
+      "created": "2026-05-27T20:40:17.719964Z",
+      "modified": "2026-05-27T20:40:17.719998Z",
+      "name": "webservers",
+      "description": "Web servers",
+      "inventory": 13,
+      "variables": ""
+    }
+  ],
+  "summary": {
+    "total_hosts": 3,
+    "total_groups": 2,
+    "host_names": [
+      "db-01.example.com",
+      "web-01.example.com",
+      "web-02.example.com"
+    ]
+  }
+}

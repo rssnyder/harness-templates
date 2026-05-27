@@ -1,0 +1,48 @@
+pipeline:
+  name: AWX
+  identifier: AWX
+  projectIdentifier: rssnyder
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: AWX
+        identifier: AWX
+        description: ""
+        type: Deployment
+        spec:
+          deploymentType: CustomDeployment
+          customDeploymentRef:
+            templateRef: account.AWX
+            versionLabel: "1.0"
+          service:
+            serviceRef: account.awx_example
+          execution:
+            steps:
+              - step:
+                  name: Fetch Instances
+                  identifier: fetchInstances
+                  type: FetchInstanceScript
+                  timeout: 10m
+                  spec: {}
+            rollbackSteps: []
+          environment:
+            environmentRef: account.lab
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: awx
+                inputs:
+                  identifier: awx
+                  type: CustomDeployment
+                  spec:
+                    variables:
+                      - name: inventory
+                        type: String
+                        value: <+input>
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
